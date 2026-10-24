@@ -1037,6 +1037,13 @@
           <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">Socratic 提示次數 · Hints</div>
           <div class="stat-val" id="statHints">0</div>
         </div>
+        <div class="stat-card" style="grid-column: 1 / -1;">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">立體圖形準確率 · 3D Shapes</div>
+          <div class="stat-val">
+            <span id="statShapeRate">--%</span>
+            <span id="statShapeCount" style="font-size: 0.85rem; font-weight: 800; color: var(--warm-grey); margin-left: 6px;"></span>
+          </div>
+        </div>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
         <button class="nav-btn secondary" onclick="resetStats()">重設紀錄 Reset</button>
@@ -1445,10 +1452,27 @@
     const questionHistory = { p1_num: [], p1_word: [], p2_adv: [], olympiad: [], shapes3d: [] };
     const historyCursor = { p1_num: -1, p1_word: -1, p2_adv: -1, olympiad: -1, shapes3d: -1 };
 
-    let stats = JSON.parse(localStorage.getItem('redball_stats_v5') || '{"stars":0,"correct":0,"unassisted":0,"logicTotal":0,"logicCorrect":0,"hints":0}');
+    const STATS_KEY = 'redball_stats_v5';
+    const STATS_DEFAULT = {
+      stars: 0, correct: 0, unassisted: 0,
+      logicTotal: 0, logicCorrect: 0, hints: 0,
+      shapeTotal: 0, shapeCorrect: 0
+    };
+
+    function loadStats() {
+      let saved = {};
+      try {
+        saved = JSON.parse(localStorage.getItem(STATS_KEY) || '{}') || {};
+      } catch (err) {
+        saved = {};
+      }
+      return Object.assign({}, STATS_DEFAULT, saved);
+    }
+
+    let stats = loadStats();
 
     function saveStats() {
-      localStorage.setItem('redball_stats_v5', JSON.stringify(stats));
+      localStorage.setItem(STATS_KEY, JSON.stringify(stats));
       document.getElementById('starScore').innerText = stats.stars;
     }
 
@@ -1853,7 +1877,10 @@
     }
 
     function checkOption(btnEl, selectedVal, q) {
-      const isLogic = (currentMod === 'p1_word' || currentMod === 'olympiad');
+      /* Word problems, olympiad and 3D shapes are reasoning, not arithmetic drill —
+         all three feed the logic rate; 3D additionally gets its own accuracy bucket. */
+      const isLogic = (currentMod === 'p1_word' || currentMod === 'olympiad' || currentMod === 'shapes3d');
+      const isShape = (currentMod === 'shapes3d');
       if (selectedVal === q.ans) {
         btnEl.classList.add('correct-choice');
         document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
@@ -1861,6 +1888,7 @@
         stats.correct++;
         if (!usedHelperThisQ) stats.unassisted++;
         if (isLogic) { stats.logicTotal++; stats.logicCorrect++; }
+        if (isShape) { stats.shapeTotal++; stats.shapeCorrect++; }
         saveStats();
         pokeRedBall();
         const praise = (langMode === 'en') ? `Woohoo! ${selectedVal} is spot on!` : `好嘢！答案係 ${selectedVal}，完全正確！`;
@@ -1870,6 +1898,7 @@
         btnEl.disabled = true;
         stats.hints++;
         if (isLogic) stats.logicTotal++;
+        if (isShape) stats.shapeTotal++;
         saveStats();
         const hint = (langMode === 'en') ? q.hintEn : q.hintZh;
         setRedBallSpeech(hint);
@@ -2037,6 +2066,11 @@
       document.getElementById('statHints').innerText = stats.hints;
       const rate = stats.logicTotal > 0 ? Math.round((stats.logicCorrect / stats.logicTotal) * 100) + '%' : '100%';
       document.getElementById('statLogicRate').innerText = rate;
+      const shapeRate = stats.shapeTotal > 0 ? Math.round((stats.shapeCorrect / stats.shapeTotal) * 100) + '%' : '--%';
+      document.getElementById('statShapeRate').innerText = shapeRate;
+      document.getElementById('statShapeCount').innerText = stats.shapeTotal > 0
+        ? `（答對 ${stats.shapeCorrect} / 共 ${stats.shapeTotal} 題）`
+        : '（未做過立體圖形題）';
       document.getElementById('reportModal').classList.add('active');
     }
 
@@ -2045,7 +2079,7 @@
     }
 
     function resetStats() {
-      stats = { stars: 0, correct: 0, unassisted: 0, logicTotal: 0, logicCorrect: 0, hints: 0 };
+      stats = Object.assign({}, STATS_DEFAULT);
       saveStats();
       openReportModal();
     }
