@@ -498,6 +498,52 @@
       border: 2px solid var(--warm-grey-light);
     }
 
+    .three-single {
+      width: 100%;
+      height: 250px;
+      background: var(--warm-cream);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--warm-grey-light);
+    }
+
+    .three-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      gap: 10px;
+    }
+
+    .three-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .three-tile-box {
+      height: 150px;
+      background: var(--warm-cream);
+      border-radius: 14px;
+      border: 2px solid var(--warm-grey-light);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .three-tile-label {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .three-tile-label-en {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--warm-grey);
+    }
+
     /* Options Grid */
     .options-grid {
       display: grid;
@@ -1060,6 +1106,52 @@
     };
     const SHAPE_KEYS = Object.keys(SHAPE_LIB);
 
+    /* Unambiguous property questions — each answer is the ONLY shape in SHAPE_LIB that fits. */
+    const CONCEPT_ASKS = [
+      {
+        ansShape: 'sphere',
+        zh: '把以下哪一個立體圖形放在斜板上，它可以向前後左右任何方向滾動？',
+        en: 'Which of these shapes rolls in every direction when put on a slope?',
+        hintZh: '球體整個表面都是曲面，每一點都可以接觸地面，所以任何方向都滾得動。圓柱體只可以向一個方向滾，其他圖形有平面，滾不動。',
+        hintEn: 'A sphere is all curved surface, so it rolls every way. A cylinder rolls only one way; shapes with flat faces do not roll.'
+      },
+      {
+        ansShape: 'cone',
+        zh: '以下哪一個立體圖形只有 1 個尖頂（頂點）？',
+        en: 'Which shape has exactly one pointed vertex?',
+        hintZh: '圓錐體只有 1 個頂點（尖頂）。球體和圓柱體有 0 個，正方體和長方體有 8 個，四角錐體有 5 個。',
+        hintEn: 'A cone has exactly 1 vertex. Sphere and cylinder have 0, cube and cuboid have 8, a square pyramid has 5.'
+      },
+      {
+        ansShape: 'sphere',
+        zh: '以下哪一個立體圖形完全沒有平面、沒有棱、也沒有頂點？',
+        en: 'Which shape has no flat face, no edge and no vertex at all?',
+        hintZh: '球體全部都是曲面：0 個平面、0 條棱、0 個頂點。其他圖形最少都有 1 個平面。',
+        hintEn: 'A sphere is entirely curved: 0 flat faces, 0 edges, 0 vertices. Every other shape here has at least one flat face.'
+      },
+      {
+        ansShape: 'cube',
+        zh: '以下哪一個立體圖形有 6 個平面，而且 6 個面都是完全一樣的正方形？',
+        en: 'Which shape has 6 flat faces that are all identical squares?',
+        hintZh: '正方體 6 個面都是正方形，而且一樣大。長方體雖然都有 6 個平面，但面是長方形，唔係正方形。',
+        hintEn: 'A cube has 6 identical square faces. A cuboid also has 6 flat faces, but they are rectangles, not squares.'
+      },
+      {
+        ansShape: 'cylinder',
+        zh: '以下哪一個立體圖形的頂和底都是圓形，側面可以滾動，但直立時又可以穩定放在枱面？',
+        en: 'Which shape has a circular top and bottom, rolls on its side, and still stands steady upright?',
+        hintZh: '圓柱體有 2 個圓形平面（頂和底）加 1 個曲面。所以側放可以滾一個方向，直立時又穩。',
+        hintEn: 'A cylinder has 2 circular flat faces plus 1 curved surface — it rolls one way on its side and stands steady upright.'
+      },
+      {
+        ansShape: 'pyramid',
+        zh: '以下哪一個立體圖形有 5 個平面：1 個四邊形底加 4 個三角形？',
+        en: 'Which shape has 5 flat faces: one quadrilateral base plus 4 triangles?',
+        hintZh: '四角錐體：1 個四邊形底 + 4 個三角形側面 = 5 個平面、5 個頂點、8 條棱。圓錐體只有 2 個面。',
+        hintEn: 'A square pyramid: 1 quadrilateral base + 4 triangular sides = 5 flat faces, 5 vertices, 8 edges. A cone has only 2 faces.'
+      }
+    ];
+
     function buildShapeNumOptions(correct) {
       const set = new Set([correct]);
       const cands = [correct + 1, correct - 1, correct + 2, correct - 2, 6, 8, 12, 5, 2, 1, 0, 3];
@@ -1254,15 +1346,34 @@
       },
 
       shapes3d() {
+        const base = { printOptions: true, isOlympiad: false };
+
+        /* ~45% of the time: a property / comparison question answered by picking a shape */
+        if (Math.random() < 0.45) {
+          const c = pickOne(CONCEPT_ASKS);
+          const nameOf = (k) => `${SHAPE_LIB[k].zh}（${SHAPE_LIB[k].en}）`;
+          const correct = nameOf(c.ansShape);
+          const distract = shuffleArray(SHAPE_KEYS.filter(k => k !== c.ansShape))
+            .slice(0, 3)
+            .map(nameOf);
+          const options = shuffleArray([correct, ...distract]);
+          return Object.assign({}, base, {
+            level: "3D 圖形概念 · Shape Properties",
+            zh: c.zh,
+            en: c.en,
+            options,
+            ans: correct,
+            helperType: "threejs-gallery",
+            galleryKeys: options.map(o => SHAPE_KEYS.find(k => nameOf(k) === o)),
+            hintZh: c.hintZh,
+            hintEn: c.hintEn
+          });
+        }
+
         const key = pickOne(SHAPE_KEYS);
         const s = SHAPE_LIB[key];
         const archetype = pickOne(['flat', 'curved', 'vertices', 'edges', 'everyday']);
-        const base = {
-          helperType: "threejs",
-          shapeKey: key,
-          printOptions: true,
-          isOlympiad: false
-        };
+        Object.assign(base, { helperType: "threejs", shapeKey: key });
         const factCardZh = `睇下 3D 圖形：${s.zh} 有 ${s.flat} 個平面、${s.curved} 個曲面、${s.vertices} 個頂點、${s.edges} 條棱。`;
         const factCardEn = `Count it on the model: a ${s.en.toLowerCase()} has ${s.flat} flat face(s), ${s.curved} curved surface(s), ${s.vertices} vertex/vertices and ${s.edges} edge(s).`;
 
@@ -1441,7 +1552,8 @@
     /* ============================================================================
        THREE.JS 3D SHAPE VIEWER  (with graceful SVG fallback)
        ============================================================================ */
-    let threeState = null;
+    let threeStates = [];
+    let threeLoopId = 0;
 
     const SHAPE_COLOR = {
       cylinder: 0x88cb9d, cube: 0xf2b880, cuboid: 0xe0a468,
@@ -1449,16 +1561,128 @@
     };
 
     function dispose3D() {
-      if (!threeState) return;
-      try { cancelAnimationFrame(threeState.raf); } catch (e) { /* noop */ }
-      try { window.removeEventListener('resize', threeState.onResize); } catch (e) { /* noop */ }
-      try { threeState.renderer.dispose(); } catch (e) { /* noop */ }
+      try { cancelAnimationFrame(threeLoopId); } catch (e) { /* noop */ }
+      threeLoopId = 0;
+      threeStates.forEach(st => {
+        try { window.removeEventListener('resize', st.onResize); } catch (e) { /* noop */ }
+        try { st.renderer.dispose(); } catch (e) { /* noop */ }
+        try {
+          if (st.canvas && st.canvas.parentNode) st.canvas.parentNode.removeChild(st.canvas);
+        } catch (e) { /* noop */ }
+      });
+      threeStates = [];
+    }
+
+    function startThreeLoop() {
+      if (threeLoopId) return;
+      const step = () => {
+        if (!threeStates.length) { threeLoopId = 0; return; }
+        threeLoopId = requestAnimationFrame(step);
+        threeStates.forEach(st => {
+          if (!st.dragging) st.mesh.rotation.y += st.spin;
+          st.renderer.render(st.scene, st.camera);
+        });
+      };
+      threeLoopId = requestAnimationFrame(step);
+    }
+
+    /* Build one WebGL viewer inside `host`. Returns the state object (or null on fallback). */
+    function makeShapeViewer(host, key, opts) {
+      opts = opts || {};
+      if (!host) return null;
+      if (typeof THREE === 'undefined') {
+        host.innerHTML = shapeSvgFallback(key);
+        return null;
+      }
+      let renderer;
       try {
-        if (threeState.canvas && threeState.canvas.parentNode) {
-          threeState.canvas.parentNode.removeChild(threeState.canvas);
-        }
-      } catch (e) { /* noop */ }
-      threeState = null;
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      } catch (err) {
+        host.innerHTML = shapeSvgFallback(key);
+        return null;
+      }
+      const w = host.clientWidth || 260;
+      const h = host.clientHeight || 170;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h);
+      renderer.setClearColor(0x000000, 0);
+      const dom = renderer.domElement;
+      dom.style.display = 'block';
+      dom.style.cursor = 'grab';
+      dom.style.touchAction = 'none';
+      host.appendChild(dom);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      camera.position.set(0, 0.7, opts.dist || 5.6);
+      camera.lookAt(0, 0, 0);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e4e5, 0.95));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      keyLight.position.set(4, 6, 5);
+      scene.add(keyLight);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.35);
+      rim.position.set(-5, -3, -4);
+      scene.add(rim);
+
+      const polyhedra = ['cube', 'cuboid', 'pyramid'];
+      const geo = shapeGeometry(key);
+      const mat = new THREE.MeshStandardMaterial({
+        color: SHAPE_COLOR[key] || 0x88cb9d,
+        roughness: 0.6,
+        metalness: 0.04,
+        flatShading: polyhedra.indexOf(key) !== -1
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.x = -0.12;
+      if (key === 'pyramid') mesh.rotation.y = Math.PI / 4;
+      scene.add(mesh);
+      if (polyhedra.indexOf(key) !== -1) {
+        mesh.add(new THREE.LineSegments(
+          new THREE.EdgesGeometry(geo, 15),
+          new THREE.LineBasicMaterial({ color: 0x3f7a36 })
+        ));
+      }
+
+      const st = {
+        renderer, canvas: dom, dom, scene, camera, mesh,
+        spin: opts.spin === undefined ? 0.01 : opts.spin,
+        dragging: false, onResize: null
+      };
+
+      let prevX = 0, prevY = 0;
+      dom.addEventListener('pointerdown', (e) => {
+        st.dragging = true; prevX = e.clientX; prevY = e.clientY;
+        dom.style.cursor = 'grabbing';
+        try { dom.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+      });
+      dom.addEventListener('pointermove', (e) => {
+        if (!st.dragging) return;
+        const dx = e.clientX - prevX, dy = e.clientY - prevY;
+        prevX = e.clientX; prevY = e.clientY;
+        mesh.rotation.y += dx * 0.013;
+        mesh.rotation.x = Math.max(-1.25, Math.min(1.25, mesh.rotation.x + dy * 0.013));
+      });
+      const stopDrag = (e) => {
+        st.dragging = false;
+        dom.style.cursor = 'grab';
+        try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* noop */ }
+      };
+      dom.addEventListener('pointerup', stopDrag);
+      dom.addEventListener('pointercancel', stopDrag);
+
+      st.onResize = () => {
+        const nw = host.clientWidth || w;
+        const nh = host.clientHeight || h;
+        if (!nw || !nh) return;
+        renderer.setSize(nw, nh);
+        camera.aspect = nw / nh;
+        camera.updateProjectionMatrix();
+      };
+      window.addEventListener('resize', st.onResize);
+
+      threeStates.push(st);
+      return st;
     }
 
     function shapeGeometry(key) {
@@ -1519,113 +1743,57 @@
         <div style="font-size:0.88rem;font-weight:800;color:var(--text-muted);text-align:center;margin-bottom:8px;">
           🖐️ 用手指／滑鼠拖動可以旋轉圖形 · Drag to rotate the shape
         </div>
-        <div id="threeCanvasWrap"></div>
+        <div class="three-single"></div>
         <div style="font-size:0.85rem;font-weight:800;color:var(--text-muted);text-align:center;margin-top:8px;">
           ${s.zh} · ${s.en} — 平面 Flat ${s.flat} · 曲面 Curved ${s.curved} · 頂點 Vertices ${s.vertices} · 棱 Edges ${s.edges}
         </div>
       `;
       container.appendChild(wrap);
-      const holder = wrap.querySelector('#threeCanvasWrap');
-      if (!holder) return;
+      makeShapeViewer(wrap.querySelector('.three-single'), key, { dist: 5.6 });
+      startThreeLoop();
+    }
 
-      if (typeof THREE === 'undefined') {
-        holder.innerHTML = shapeSvgFallback(key);
-        return;
-      }
+    /* Side-by-side comparison of the option shapes — labels sit under each tile. */
+    function render3DGallery(keys, container) {
+      dispose3D();
+      const wrap = document.createElement('div');
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-size:0.88rem;font-weight:800;color:var(--text-muted);text-align:center;margin-bottom:8px;';
+      hint.innerText = '🖐️ 逐個拖動都可以旋轉，慢慢比較 · Drag any shape to rotate and compare';
+      wrap.appendChild(hint);
 
-      let renderer;
-      try {
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      } catch (err) {
-        holder.innerHTML = shapeSvgFallback(key) +
-          '<div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:0.76rem;font-weight:800;color:#999;">此裝置未支援立體顯示，已改用平面示意圖</div>';
-        return;
-      }
+      const grid = document.createElement('div');
+      grid.className = 'three-gallery';
+      wrap.appendChild(grid);
+      container.appendChild(wrap);
 
-      const w = holder.clientWidth || 600;
-      const h = holder.clientHeight || 250;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(w, h);
-      renderer.setClearColor(0x000000, 0);
-      const dom = renderer.domElement;
-      dom.style.display = 'block';
-      dom.style.cursor = 'grab';
-      dom.style.touchAction = 'none';
-      holder.appendChild(dom);
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-      camera.position.set(0, 0.7, 5.6);
-      camera.lookAt(0, 0, 0);
-
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e4e5, 0.95));
-      const key_l = new THREE.DirectionalLight(0xffffff, 0.7);
-      key_l.position.set(4, 6, 5);
-      scene.add(key_l);
-      const rim = new THREE.DirectionalLight(0xffffff, 0.35);
-      rim.position.set(-5, -3, -4);
-      scene.add(rim);
-
-      const polyhedra = ['cube', 'cuboid', 'pyramid'];
-      const geo = shapeGeometry(key);
-      const mat = new THREE.MeshStandardMaterial({
-        color: SHAPE_COLOR[key] || 0x88cb9d,
-        roughness: 0.6,
-        metalness: 0.04,
-        flatShading: polyhedra.indexOf(key) !== -1
+      /* Pass 1 — build every tile first so the grid can lay out at its final size.
+         Measuring a tile while it is still the only child makes the canvas overflow
+         the tile box (grid auto-fit collapses empty tracks), which clips the solid. */
+      const tiles = [];
+      (keys || []).forEach(k => {
+        const info = SHAPE_LIB[k];
+        if (!info) return;
+        const tile = document.createElement('div');
+        tile.className = 'three-tile';
+        const box = document.createElement('div');
+        box.className = 'three-tile-box';
+        const lab = document.createElement('div');
+        lab.className = 'three-tile-label';
+        lab.innerText = info.zh;
+        const labEn = document.createElement('div');
+        labEn.className = 'three-tile-label-en';
+        labEn.innerText = info.en;
+        tile.appendChild(box);
+        tile.appendChild(lab);
+        tile.appendChild(labEn);
+        grid.appendChild(tile);
+        tiles.push({ key: k, box });
       });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.rotation.x = -0.12;
-      if (key === 'pyramid') mesh.rotation.y = Math.PI / 4;
-      scene.add(mesh);
 
-      if (polyhedra.indexOf(key) !== -1) {
-        mesh.add(new THREE.LineSegments(
-          new THREE.EdgesGeometry(geo, 15),
-          new THREE.LineBasicMaterial({ color: 0x3f7a36 })
-        ));
-      }
-
-      let dragging = false, prevX = 0, prevY = 0, spin = 0.01;
-      dom.addEventListener('pointerdown', (e) => {
-        dragging = true; prevX = e.clientX; prevY = e.clientY;
-        dom.style.cursor = 'grabbing';
-        try { dom.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
-      });
-      dom.addEventListener('pointermove', (e) => {
-        if (!dragging) return;
-        const dx = e.clientX - prevX, dy = e.clientY - prevY;
-        prevX = e.clientX; prevY = e.clientY;
-        mesh.rotation.y += dx * 0.013;
-        mesh.rotation.x = Math.max(-1.25, Math.min(1.25, mesh.rotation.x + dy * 0.013));
-      });
-      const stopDrag = (e) => {
-        dragging = false;
-        dom.style.cursor = 'grab';
-        try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* noop */ }
-      };
-      dom.addEventListener('pointerup', stopDrag);
-      dom.addEventListener('pointercancel', stopDrag);
-
-      const animate = () => {
-        if (!threeState || threeState.dom !== dom) return;
-        threeState.raf = requestAnimationFrame(animate);
-        if (!dragging) mesh.rotation.y += spin;
-        renderer.render(scene, camera);
-      };
-
-      const onResize = () => {
-        const nw = holder.clientWidth || w;
-        const nh = holder.clientHeight || h;
-        if (!nw || !nh) return;
-        renderer.setSize(nw, nh);
-        camera.aspect = nw / nh;
-        camera.updateProjectionMatrix();
-      };
-      window.addEventListener('resize', onResize);
-
-      threeState = { renderer, canvas: dom, dom, raf: 0, onResize };
-      animate();
+      /* Pass 2 — layout is now final, so each canvas gets its real tile size. */
+      tiles.forEach(t => makeShapeViewer(t.box, t.key, { dist: 5.4, spin: 0.007 }));
+      startThreeLoop();
     }
 
     function renderManipulativeContent() {
@@ -1679,6 +1847,8 @@
         container.appendChild(wrap);
       } else if (q.helperType === 'threejs') {
         render3DShape(q.shapeKey, container);
+      } else if (q.helperType === 'threejs-gallery') {
+        render3DGallery(q.galleryKeys, container);
       }
     }
 
