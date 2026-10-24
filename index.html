@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Furry Red Ball Math Explorer | 動態題庫與工作紙 (P1-P2 & Olympiad)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chiron+Hei+HK:wght@400;600;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      /* Low-Stimulation Kid-Friendly Palette */
+      --primary-green: #529C47;
+      --primary-green-dark: #3f7a36;
+      --soft-mint: #88CB9D;
+      --soft-mint-light: #e3f3e8;
+      --warm-grey: #736D71;
+      --warm-grey-light: #e6e4e5;
+      --warm-cream: #FDEDE4;
+      --warm-cream-dark: #f5d8c8;
+      --card-bg: #FAF6F3;
+      --white: #FFFFFF;
+      --text-main: #403C3E;
+      --text-muted: #736D71;
+      --redball-color: #D94E4E;
+      --redball-light: #FDE8E8;
+      --shadow-soft: 0 8px 24px -4px rgba(115, 109, 113, 0.12);
+      --font-main: 'Nunito', 'Chiron Hei HK', -apple-system, BlinkMacSystemFont, "PingFang HK", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--warm-cream);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 960px;
+      background: var(--card-bg);
+      border-radius: 28px;
+      box-shadow: var(--shadow-soft);
+      border: 3px solid var(--soft-mint);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 24px;
+    }
+
+    /* Top Header & Controls */
+    header {
+      background: var(--white);
+      padding: 16px 24px;
+      border-bottom: 2px solid var(--warm-cream-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .redball-avatar-wrap {
+      width: 58px;
+      height: 58px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .redball-svg {
+      width: 54px;
+      height: 54px;
+      animation: gentleBounce 2.2s infinite ease-in-out;
+      transform-origin: bottom center;
+      filter: drop-shadow(0 4px 6px rgba(217, 78, 78, 0.25));
+    }
+
+    .redball-svg.super-bounce {
+      animation: excitedJump 0.55s cubic-bezier(0.28, 0.84, 0.42, 1) 2;
+    }
+
+    @keyframes gentleBounce {
+      0%, 100% { transform: translateY(0) scale(1, 1); }
+      50% { transform: translateY(-6px) scale(0.96, 1.04); }
+    }
+
+    @keyframes excitedJump {
+      0%, 100% { transform: translateY(0) scale(1, 1); }
+      30% { transform: translateY(4px) scale(1.12, 0.88); }
+      60% { transform: translateY(-16px) scale(0.92, 1.08); }
+    }
+
+    .brand-title h1 {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--primary-green);
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--warm-grey);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      background: var(--warm-cream);
+      color: var(--text-main);
+      border: 2px solid var(--soft-mint);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      background: var(--soft-mint-light);
+      border-color: var(--primary-green);
+    }
+
+    .pill-btn.active-lang {
+      background: var(--primary-green);
+      color: var(--white);
+      border-color: var(--primary-green);
+    }
+
+    .pill-btn.print-trigger {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+    }
+
+    .pill-btn.print-trigger:hover {
+      background: #dbeafe;
+    }
+
+    .star-badge {
+      background: var(--soft-mint-light);
+      border: 2px solid var(--soft-mint);
+      color: var(--primary-green-dark);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Module Navigation Bar */
+    .module-nav {
+      display: flex;
+      background: var(--warm-cream);
+      padding: 10px 16px;
+      gap: 8px;
+      overflow-x: auto;
+      border-bottom: 2px solid var(--warm-cream-dark);
+    }
+
+    .mod-tab {
+      padding: 9px 16px;
+      border-radius: 14px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--warm-grey);
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .mod-tab:hover {
+      background: var(--white);
+      color: var(--primary-green);
+    }
+
+    .mod-tab.active {
+      background: var(--primary-green);
+      color: var(--white);
+      box-shadow: 0 3px 8px rgba(82, 156, 71, 0.25);
+    }
+
+    /* Main Workspace Stage */
+    .stage-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .redball-dialogue {
+      background: var(--white);
+      border: 2px solid var(--soft-mint);
+      border-left: 7px solid var(--redball-color);
+      border-radius: 18px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .dialogue-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .speaker-tag {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--redball-color);
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .dialogue-text {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .voice-btns {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .tts-mini-btn {
+      background: var(--soft-mint-light);
+      color: var(--primary-green-dark);
+      border: 1.5px solid var(--soft-mint);
+      padding: 6px 11px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tts-mini-btn:hover {
+      background: var(--soft-mint);
+      color: var(--white);
+    }
+
+    /* Question Card */
+    .question-card {
+      background: var(--white);
+      border-radius: 22px;
+      padding: 22px 24px;
+      border: 2px solid var(--warm-grey-light);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+    }
+
+    .q-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .level-pill {
+      background: var(--soft-mint-light);
+      color: var(--primary-green-dark);
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .level-pill.olympiad {
+      background: var(--redball-light);
+      color: #B83B3B;
+    }
+
+    .infinite-badge {
+      background: var(--warm-cream);
+      color: var(--warm-grey);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      border: 1px solid var(--warm-grey-light);
+    }
+
+    .q-text-zh {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.65;
+      margin-bottom: 6px;
+    }
+
+    .q-text-en {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--warm-grey);
+      line-height: 1.5;
+    }
+
+    /* Switchable Visual Tool Bar */
+    .helper-toggle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--soft-mint-light);
+      border: 2px dashed var(--primary-green);
+      padding: 10px 18px;
+      border-radius: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .helper-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--primary-green-dark);
+    }
+
+    .switch-btn {
+      background: var(--primary-green);
+      color: var(--white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .switch-btn.off-state {
+      background: var(--warm-grey);
+    }
+
+    .manipulative-drawer {
+      display: none;
+      background: var(--white);
+      border-radius: 20px;
+      padding: 20px;
+      border: 2px solid var(--soft-mint);
+      animation: slideDown 0.25s ease-out;
+    }
+
+    .manipulative-drawer.open {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ten-frame-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .frames-wrapper {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .ten-frame-box {
+      display: grid;
+      grid-template-columns: repeat(5, 46px);
+      grid-template-rows: repeat(2, 46px);
+      gap: 6px;
+      background: var(--warm-cream);
+      padding: 10px;
+      border-radius: 14px;
+      border: 2px solid var(--warm-grey);
+    }
+
+    .tf-cell {
+      width: 46px;
+      height: 46px;
+      background: var(--white);
+      border-radius: 10px;
+      border: 1.5px solid #d4d0d2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .tf-cell:hover {
+      border-color: var(--primary-green);
+    }
+
+    .tf-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .tf-dot.green-dot {
+      background: var(--primary-green);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+    }
+
+    .tf-dot.coral-dot {
+      background: var(--redball-color);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+    }
+
+    .bar-visualizer {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 10px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-label {
+      min-width: 125px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-align: right;
+      color: var(--text-main);
+    }
+
+    .bar-track {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .bar-block {
+      min-height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: var(--white);
+      padding: 6px 12px;
+      transition: all 0.4s ease;
+    }
+
+    #threeCanvasWrap {
+      width: 100%;
+      height: 250px;
+      background: var(--warm-cream);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--warm-grey-light);
+    }
+
+    /* Options Grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .option-btn {
+      background: var(--white);
+      border: 2.5px solid var(--warm-grey-light);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary-green);
+      background: var(--soft-mint-light);
+      transform: translateY(-2px);
+    }
+
+    .option-btn.wrong-choice {
+      background: #f2ecee;
+      border-color: var(--warm-grey);
+      color: var(--warm-grey);
+      text-decoration: line-through;
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .option-btn.correct-choice {
+      background: var(--primary-green);
+      border-color: var(--primary-green-dark);
+      color: var(--white);
+    }
+
+    footer {
+      background: var(--white);
+      padding: 16px 24px;
+      border-top: 2px solid var(--warm-cream-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: var(--primary-green);
+      color: var(--white);
+      border: none;
+      padding: 11px 22px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .nav-btn:hover:not(:disabled) { background: var(--primary-green-dark); }
+    .nav-btn:active:not(:disabled) { transform: scale(0.97); }
+    .nav-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .nav-btn.secondary {
+      background: var(--warm-cream);
+      color: var(--text-main);
+      border: 2px solid var(--warm-grey-light);
+    }
+
+    /* Modals (Parent Report & Print Setup) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(64, 60, 62, 0.55);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 200;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 3px solid var(--soft-mint);
+      border-radius: 24px;
+      max-width: 580px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat-card {
+      background: var(--white);
+      padding: 14px;
+      border-radius: 14px;
+      border: 1.5px solid var(--warm-grey-light);
+    }
+
+    .stat-val {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary-green);
+    }
+
+    /* Print Setup Radio Cards */
+    .print-mode-card {
+      background: var(--white);
+      border: 2px solid var(--warm-grey-light);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s;
+    }
+
+    .print-mode-card:hover {
+      border-color: var(--primary-green);
+      background: var(--soft-mint-light);
+    }
+
+    .print-mode-card.selected {
+      border-color: var(--primary-green);
+      background: var(--soft-mint-light);
+      box-shadow: 0 0 0 2px var(--primary-green);
+    }
+
+    /* ============================================================================
+       PRINT-ONLY WORKSHEET TEMPLATE & CSS (@media print)
+       ============================================================================ */
+    #printWorksheetContainer {
+      display: none;
+      width: 100%;
+      background: #fff;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+
+      /* Hide interactive app shell */
+      .app-shell, .modal-overlay, footer {
+        display: none !important;
+      }
+
+      /* Show clean printable worksheet */
+      #printWorksheetContainer {
+        display: block !important;
+      }
+
+      .ws-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .ws-title {
+        font-size: 18pt;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+      }
+
+      .ws-meta-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #666;
+        padding: 8px 0;
+        margin-bottom: 16px;
+        font-size: 11pt;
+        font-weight: 700;
+      }
+
+      .ws-item {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .ws-q-num {
+        font-weight: 900;
+        font-size: 12pt;
+      }
+
+      .ws-q-zh {
+        font-size: 13pt;
+        font-weight: 800;
+        line-height: 1.6;
+        margin: 4px 0;
+      }
+
+      .ws-q-en {
+        font-size: 10pt;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 10px;
+      }
+
+      .ws-work-box {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+      }
+
+      .ws-scratchpad {
+        flex: 1;
+        height: 80px;
+        border: 1px dashed #999;
+        border-radius: 6px;
+        padding: 6px;
+        font-size: 9pt;
+        color: #888;
+      }
+
+      .ws-ans-zone {
+        width: 220px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 8px;
+        font-size: 11pt;
+        font-weight: 800;
+      }
+
+      .ws-line {
+        border-bottom: 1.5px solid #000;
+        display: inline-block;
+        min-width: 90px;
+        margin: 0 4px;
+      }
+
+      .ws-print-tenframe {
+        display: inline-grid;
+        grid-template-columns: repeat(5, 20px);
+        grid-template-rows: repeat(2, 20px);
+        gap: 2px;
+        border: 1px solid #000;
+        padding: 2px;
+        margin-right: 8px;
+      }
+
+      .ws-print-tf-cell {
+        border: 1px solid #aaa;
+        width: 20px;
+        height: 20px;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+      .ws-answers-header {
+        font-size: 15pt;
+        font-weight: 900;
+        margin-top: 20px;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Application Shell -->
+  <div class="app-shell">
+    <header>
+      <div class="brand-group">
+        <div class="redball-avatar-wrap" onclick="pokeRedBall()" title="Tap Furry Red Ball!">
+          <svg class="redball-svg" id="redballSvg" viewBox="0 0 100 100">
+            <path d="M50 6 L57 11 L65 7 L69 14 L78 13 L79 21 L88 23 L86 32 L93 37 L89 45 L95 52 L88 59 L92 67 L84 72 L85 80 L76 82 L74 90 L65 88 L59 95 L50 91 L41 95 L35 88 L26 90 L24 82 L15 80 L16 72 L8 67 L12 59 L5 52 L11 45 L7 37 L14 32 L12 23 L21 21 L22 13 L31 14 L35 7 L43 11 Z" fill="#D94E4E" stroke="#B83B3B" stroke-width="2.5" stroke-linejoin="round"/>
+            <ellipse cx="38" cy="30" rx="14" ry="8" transform="rotate(-20 38 30)" fill="#F07878" opacity="0.5"/>
+            <circle cx="37" cy="46" r="9.5" fill="#FFFFFF"/>
+            <circle cx="63" cy="46" r="9.5" fill="#FFFFFF"/>
+            <circle cx="39" cy="46" r="5" fill="#2B282A"/>
+            <circle cx="61" cy="46" r="5" fill="#2B282A"/>
+            <circle cx="41" cy="43" r="2" fill="#FFFFFF"/>
+            <circle cx="63" cy="43" r="2" fill="#FFFFFF"/>
+            <path d="M 43 60 Q 50 67 57 60" fill="none" stroke="#2B282A" stroke-width="3.5" stroke-linecap="round"/>
+            <ellipse cx="26" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity="0.7"/>
+            <ellipse cx="74" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>Furry Red Ball Math Explorer</h1>
+          <div class="brand-subtitle">動態題庫 · P1–P2 雙語互動與工作紙列印系統 (Worksheet Ready)</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="pill-btn print-trigger" onclick="openPrintModal()">
+          🖨️ 列印工作紙 Print
+        </button>
+        <button class="pill-btn active-lang" id="btnLangMode" onclick="cycleLangMode()">
+          🌐 雙語 Bilingual
+        </button>
+        <button class="pill-btn" onclick="openReportModal()">
+          📊 報告 Report
+        </button>
+        <div class="star-badge">
+          <span>⭐</span>
+          <span id="starScore">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="module-nav">
+      <button class="mod-tab active" onclick="selectModule('p1_num')" id="tab_p1_num">
+        1. P1 加減與十格陣 (Add/Sub)
+      </button>
+      <button class="mod-tab" onclick="selectModule('p1_word')" id="tab_p1_word">
+        2. P1/P2 雙語應用題 (Word Problems)
+      </button>
+      <button class="mod-tab" onclick="selectModule('p2_adv')" id="tab_p2_adv">
+        3. P2 乘除與退位 (P2 Core)
+      </button>
+      <button class="mod-tab" onclick="selectModule('olympiad')" id="tab_olympiad">
+        4. 🏆 P1/P2 奧數挑戰 (Math Olympiad)
+      </button>
+      <button class="mod-tab" onclick="selectModule('shapes3d')" id="tab_shapes3d">
+        5. 3D 立體圖形實驗 (3D Shapes)
+      </button>
+    </nav>
+
+    <!-- Main Body Stage -->
+    <div class="stage-body">
+      <div class="redball-dialogue">
+        <div class="dialogue-left">
+          <div>
+            <span class="speaker-tag">Furry Red Ball</span>
+            <div class="dialogue-text" id="redballSpeech">
+              Bouncy-bounce! 隨時撳上方「🖨️ 列印工作紙」掣，即刻可以印出標準 A4 練習卷喺紙上做！
+            </div>
+          </div>
+        </div>
+        <div class="voice-btns">
+          <button class="tts-mini-btn" onclick="speakCurrentQuestion('zh-HK')">🔊 粵語</button>
+          <button class="tts-mini-btn" onclick="speakCurrentQuestion('en-US')">🔊 EN</button>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="question-card">
+        <div class="q-meta-bar">
+          <span class="level-pill" id="qBadge">P1 核心基礎 · Core</span>
+          <span class="infinite-badge" id="qProgress">♾️ 動態生成 第 1 題</span>
+        </div>
+        <div class="q-text-zh" id="qTextZh"></div>
+        <div class="q-text-en" id="qTextEn"></div>
+      </div>
+
+      <!-- Switchable Helper -->
+      <div class="helper-toggle-bar">
+        <div class="helper-info">
+          <span>🛠️</span>
+          <span id="helperLabelText">輔助工具已隱藏，避免直接劇透答案 · Visual Helper is OFF</span>
+        </div>
+        <button class="switch-btn off-state" id="btnToggleHelper" onclick="toggleVisualHelper()">
+          👁️ 打開輔助工具 Show Helper
+        </button>
+      </div>
+
+      <div class="manipulative-drawer" id="manipulativeDrawer">
+        <div id="manipulativeContent"></div>
+      </div>
+
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+
+    <!-- Footer Controls -->
+    <footer>
+      <button class="nav-btn secondary" id="btnPrevQ" onclick="prevQuestion()">⬅ 上一題 Prev</button>
+      <div style="font-size: 0.85rem; font-weight: 800; color: var(--warm-grey);">
+        🖨️ 隨時支援 A4 黑白列印與解答頁 · Printable Worksheets Ready
+      </div>
+      <button class="nav-btn" onclick="generateAndPushQuestion()">🎲 隨機新題目 New Question ➔</button>
+    </footer>
+  </div>
+
+  <!-- Print Configuration Modal -->
+  <div class="modal-overlay" id="printModal">
+    <div class="modal-box">
+      <h2 style="color: var(--primary-green); font-weight: 900; margin-bottom: 6px;">
+        🖨️ 列印工作紙設定 · Print Worksheet Setup
+      </h2>
+      <p style="font-size: 0.9rem; color: var(--warm-grey); font-weight: 700; margin-bottom: 16px;">
+        選擇你想列印的工作紙格式，系統會自動排版成適合學生用鉛筆作答的 A4 頁面：
+      </p>
+
+      <div class="print-mode-card selected" id="optPrintCurrent" onclick="setPrintMode('current')">
+        <div>
+          <div style="font-weight: 900; font-size: 1.05rem; color: var(--text-main);">📄 列印當前題目 (單題練習卡)</div>
+          <div style="font-size: 0.82rem; color: var(--warm-grey); font-weight: 700;">印出畫面上這 1 道題目，附帶特大「算草欄」與作答格式</div>
+        </div>
+        <span style="font-size: 1.3rem;">🔘</span>
+      </div>
+
+      <div class="print-mode-card" id="optPrint10" onclick="setPrintMode('10mixed')">
+        <div>
+          <div style="font-weight: 900; font-size: 1.05rem; color: var(--text-main);">📑 生成 10 題綜合練習卷 (A4 標準卷)</div>
+          <div style="font-size: 0.82rem; color: var(--warm-grey); font-weight: 700;">跨範疇隨機抽題（加減、文字題、退位、奧數），滿分 100 分</div>
+        </div>
+        <span style="font-size: 1.3rem;">⚪</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin: 16px 0;">
+        <input type="checkbox" id="chkIncludeAnswers" checked style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="chkIncludeAnswers" style="font-weight: 800; font-size: 0.95rem; cursor: pointer;">
+          附設家長/教師答案頁與解難提示 (Append Answer Key on Last Page)
+        </label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="nav-btn secondary" onclick="closePrintModal()">取消 Cancel</button>
+        <button class="nav-btn" onclick="executePrintJob()">🖨️ 即刻列印 Print Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parent Diagnostic Modal -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-box">
+      <h2 style="color: var(--primary-green); font-weight: 900; margin-bottom: 6px;">
+        📊 家長診斷報告 · Parent Diagnostic Report
+      </h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">總答對題數 · Correct</div>
+          <div class="stat-val" id="statCorrect">0</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">不開工具獨立完成 · Unassisted</div>
+          <div class="stat-val" id="statUnassisted">0</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">文字題/奧數準確率 · Logic</div>
+          <div class="stat-val" id="statLogicRate">--%</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">Socratic 提示次數 · Hints</div>
+          <div class="stat-val" id="statHints">0</div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+        <button class="nav-btn secondary" onclick="resetStats()">重設紀錄 Reset</button>
+        <button class="nav-btn" onclick="closeReportModal()">關閉 Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Print Container -->
+  <div id="printWorksheetContainer"></div>
+
+  <script>
+    /* ============================================================================
+       PROCEDURAL MATH ENGINE
+       ============================================================================ */
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildOptions(correctVal, trapVals, unitZh = "", unitEn = "") {
+      const formatOpt = (v) => {
+        if (unitZh && unitEn) return `${v} ${unitZh} (${v} ${unitEn})`;
+        if (unitZh) return `${v} ${unitZh}`;
+        return `${v}`;
+      };
+      const set = new Set([correctVal]);
+      for (const t of trapVals) {
+        if (t > 0 && !set.has(t)) set.add(t);
+        if (set.size === 4) break;
+      }
+      let offset = 1;
+      while (set.size < 4) {
+        const cand = correctVal + (offset % 2 === 0 ? offset : -offset);
+        if (cand > 0 && !set.has(cand)) set.add(cand);
+        offset++;
+      }
+      return {
+        ans: formatOpt(correctVal),
+        options: shuffleArray(Array.from(set).map(formatOpt))
+      };
+    }
+
+    const ProceduralGenerator = {
+      p1_num() {
+        const archetype = pickOne(['make10_add', 'break10_sub', 'missing_addend']);
+        if (archetype === 'make10_add') {
+          const a = randInt(6, 9);
+          const b = randInt(11 - a, 9);
+          const sum = a + b;
+          const { ans, options } = buildOptions(sum, [sum - 1, sum + 1, sum - 2]);
+          return {
+            level: "P1 湊十進位加法 · Make-10 Addition",
+            zh: `計算：${a} + ${b} = ?`,
+            en: `Calculate: ${a} + ${b} = ?`,
+            options, ans, helperType: "tenframe",
+            hintZh: `用湊十法：${a} 爭 ${10 - a} 湊成 10，將 ${b} 拆開，10 + ${b - (10 - a)} = ${sum}。`,
+            hintEn: `Make-10: ${a} needs ${10 - a} more. 10 + ${b - (10 - a)} = ${sum}.`
+          };
+        }
+        if (archetype === 'break10_sub') {
+          const min = randInt(11, 18);
+          const ones = min - 10;
+          const sub = randInt(ones + 1, 9);
+          const diff = min - sub;
+          const { ans, options } = buildOptions(diff, [diff + 1, diff - 1, 10 + (sub - ones)]);
+          return {
+            level: "P1 破十減法 · Regrouping Subtraction",
+            zh: `計算：${min} - ${sub} = ?`,
+            en: `Calculate: ${min} - ${sub} = ?`,
+            options, ans, helperType: "tenframe",
+            hintZh: `Furry Red Ball 提示：將 ${min} 拆做 10 同 ${ones}，10 - ${sub} = ${10 - sub}，再加返 ${ones} 等於 ${diff}。`,
+            hintEn: `Furry Red Ball hint: Break ${min} into 10 and ${ones}. 10 - ${sub} = ${10 - sub}, then add ${ones} = ${diff}.`
+          };
+        }
+        const a = randInt(5, 9);
+        const miss = randInt(4, 9);
+        const tot = a + miss;
+        const { ans, options } = buildOptions(miss, [tot + a, miss + 1, miss - 1]);
+        return {
+          level: "P1 未知加數 · Missing Addend",
+          zh: `填空：${a} + [ ? ] = ${tot}`,
+          en: `Fill in the blank: ${a} + [ ? ] = ${tot}`,
+          options, ans, helperType: "tenframe",
+          hintZh: `用總數 ${tot} 減去 ${a}：${tot} - ${a} = ${miss}。`,
+          hintEn: `Subtract ${a} from total ${tot}: ${tot} - ${a} = ${miss}.`
+        };
+      },
+
+      p1_word() {
+        const archetype = pickOne(['comp_more', 'two_step_bus', 'hk_money']);
+        if (archetype === 'comp_more') {
+          const a = randInt(7, 14);
+          const diff = randInt(4, 8);
+          const b = a + diff;
+          const { ans, options } = buildOptions(b, [Math.max(1, a - diff), b + 1, b - 1], "粒");
+          return {
+            level: "P1 比較型逆向題 · Comparison Trap",
+            zh: `小華有 ${a} 粒士多啤梨，小華「比」小明「少」${diff} 粒。請問小明有士多啤梨多少粒？`,
+            en: `Wah has ${a} strawberries. Wah has ${diff} FEWER than Ming. How many strawberries does Ming have?`,
+            options, ans, helperType: "barmodel",
+            bars: [{ label: "小華 Wah", width: 45, text: `${a}`, color: "#529C47" }, { label: "小明 Ming", width: 80, text: `${a} + ${diff} = ?`, color: "#88CB9D" }],
+            hintZh: `小華比小明少，即係小明多啲！列式：${a} + ${diff} = ${b} 粒。`,
+            hintEn: `Wah has fewer, so Ming has more! Formula: ${a} + ${diff} = ${b}.`
+          };
+        }
+        if (archetype === 'two_step_bus') {
+          const st = randInt(20, 32);
+          const off = randInt(6, 10);
+          const on = randInt(5, 12);
+          const ansVal = st - off + on;
+          const { ans, options } = buildOptions(ansVal, [st - off, st + off + on, ansVal - 2], "人");
+          return {
+            level: "P2 兩步應用題 · Two-Step Word Problem",
+            zh: `港鐵車廂原本有 ${st} 人，到站後有 ${off} 人落車，再有 ${on} 人上車。現在車廂內有乘客多少人？`,
+            en: `There were ${st} passengers on a train. ${off} got off and ${on} got on. How many passengers are there now?`,
+            options, ans, helperType: "barmodel",
+            bars: [{ label: "第 1 步", width: 55, text: `${st} - ${off} = ${st - off}`, color: "#736D71" }, { label: "第 2 步", width: 85, text: `${st - off} + ${on} = ?`, color: "#529C47" }],
+            hintZh: `兩步計算：${st} - ${off} = ${st - off}，然後 ${st - off} + ${on} = ${ansVal} 人。`,
+            hintEn: `Step 1: ${st} - ${off} = ${st - off}. Step 2: ${st - off} + ${on} = ${ansVal}.`
+          };
+        }
+        const p1 = randInt(12, 22);
+        const p2 = randInt(11, 18);
+        const tot = p1 + p2;
+        const change = 50 - tot;
+        const { ans, options } = buildOptions(change, [change + 10, tot, change - 2], "元");
+        return {
+          level: "P2 香港貨幣與找續 · HK Money & Change",
+          zh: `買果汁要 ${p1} 元，買餅乾要 ${p2} 元。付一張 50 元紙幣，應找回多少元？`,
+          en: `Juice costs $${p1} and biscuits cost $${p2}. If paying with a $50 note, how much change is returned?`,
+          options, ans, helperType: "barmodel",
+          bars: [{ label: "付 Paid", width: 90, text: "$50", color: "#736D71" }, { label: "售價 Cost", width: 65, text: `$${p1} + $${p2} = $${tot}`, color: "#529C47" }],
+          hintZh: `總售價：${p1} + ${p2} = ${tot} 元。找續：50 - ${tot} = ${change} 元。`,
+          hintEn: `Total: $${p1} + $${p2} = $${tot}. Change: $50 - $${tot} = $${change}.`
+        };
+      },
+
+      p2_adv() {
+        const archetype = pickOne(['borrow_2digit', 'mult_groups']);
+        if (archetype === 'borrow_2digit') {
+          const t1 = randInt(5, 8);
+          const o1 = randInt(1, 4);
+          const t2 = randInt(1, t1 - 2);
+          const o2 = randInt(o1 + 3, 9);
+          const n1 = t1 * 10 + o1;
+          const n2 = t2 * 10 + o2;
+          const diff = n1 - n2;
+          const { ans, options } = buildOptions(diff, [diff + 10, (t1 - t2) * 10 + (o2 - o1), diff - 2]);
+          return {
+            level: "P2 兩位數退位減法 · 2-Digit Borrowing",
+            zh: `計算：${n1} - ${n2} = ?`,
+            en: `Calculate: ${n1} - ${n2} = ?`,
+            options, ans, helperType: "barmodel",
+            bars: [{ label: "退位借一", width: 85, text: `${n1} = ${(t1 - 1) * 10} + ${10 + o1}`, color: "#529C47" }],
+            hintZh: `個位 ${o1} 借 1 個十變成 ${10 + o1} - ${o2} = ${10 + o1 - o2}。十位剩 ${t1 - 1} - ${t2} = ${t1 - 1 - t2}。答案 ${diff}。`,
+            hintEn: `Regroup: ${10 + o1} - ${o2} = ${10 + o1 - o2}, then tens: ${t1 - 1} - ${t2} = ${t1 - 1 - t2}. Answer: ${diff}.`
+          };
+        }
+        const per = randInt(2, 5);
+        const grp = randInt(4, 7);
+        const tot = per * grp;
+        const { ans, options } = buildOptions(tot, [per + grp, tot + per, tot - per], "件");
+        return {
+          level: "P2 乘法概念 · Multiplication Groups",
+          zh: `每隻蒸籠有 ${per} 件點心，${grp} 隻蒸籠共有點心多少件？ (${per} × ${grp})`,
+          en: `Each basket has ${per} Dim Sum. How many in ${grp} baskets? (${per} × ${grp})`,
+          options, ans, helperType: "barmodel",
+          bars: [{ label: "乘法", width: 85, text: `${grp} 個 ${per} 相加 = ?`, color: "#529C47" }],
+          hintZh: `${per} 乘 ${grp} 即係 ${grp} 個 ${per} 相加，等於 ${tot} 件。`,
+          hintEn: `${per} × ${grp} = ${tot}.`
+        };
+      },
+
+      olympiad() {
+        const archetype = pickOne(['queue', 'sawing', 'age']);
+        if (archetype === 'queue') {
+          const f = randInt(4, 8);
+          const b = randInt(4, 7);
+          const tot = f + b - 1;
+          const { ans, options } = buildOptions(tot, [f + b, tot - 1, f + b + 1], "人");
+          return {
+            level: "🏆 奧數：排隊重疊問題 · Queue Logic",
+            isOlympiad: true,
+            zh: `小朋友排隊買雪糕。由前數起 Furry Red Ball 排第 ${f}，由後數起排第 ${b}。這隊共有多少人？`,
+            en: `Furry Red Ball is ${f}th from the front and ${b}th from the back. How many people in the queue?`,
+            options, ans, helperType: "barmodel",
+            bars: [{ label: "排隊重疊", width: 90, text: `前 ${f-1} 人 + [Furry Red Ball] + 後 ${b-1} 人`, color: "#D94E4E" }],
+            hintZh: `Furry Red Ball 自己被重複數了兩次！列式：${f} + ${b} - 1 = ${tot} 人。`,
+            hintEn: `Furry Red Ball was counted twice! ${f} + ${b} - 1 = ${tot}.`
+          };
+        }
+        if (archetype === 'sawing') {
+          const pieces = randInt(3, 6);
+          const cuts = pieces - 1;
+          const min = randInt(2, 4);
+          const tot = cuts * min;
+          const { ans, options } = buildOptions(tot, [pieces * min, tot - min, tot + min], "分鐘");
+          return {
+            level: "🏆 奧數：鋸木間隔問題 · Interval Logic",
+            isOlympiad: true,
+            zh: `把木頭鋸成 ${pieces} 段，每鋸一次要 ${min} 分鐘。全部鋸完一共需要多少分鐘？`,
+            en: `To saw a log into ${pieces} pieces, each cut takes ${min} mins. How many minutes in total?`,
+            options, ans, helperType: "barmodel",
+            bars: [{ label: "刀數", width: 90, text: `鋸成 ${pieces} 段只需鋸 ${cuts} 刀`, color: "#529C47" }],
+            hintZh: `刀數 = 段數 - 1。鋸 ${pieces} 段只需鋸 ${cuts} 刀：${cuts} × ${min} = ${tot} 分鐘。`,
+            hintEn: `Cuts = pieces - 1. ${cuts} cuts × ${min} mins = ${tot} mins.`
+          };
+        }
+        const gap = randInt(3, 6);
+        const yLater = randInt(4, 9);
+        const { ans, options } = buildOptions(gap, [gap + yLater, yLater, gap + 1], "歲");
+        return {
+          level: "🏆 奧數：年齡差不變 · Age Invariance",
+          isOlympiad: true,
+          zh: `今年哥哥比妹妹大 ${gap} 歲。請問 ${yLater} 年之後，哥哥比妹妹大多少歲？`,
+          en: `Big brother is ${gap} years older than sister today. In ${yLater} years, how many years older will he be?`,
+          options, ans, helperType: "barmodel",
+          bars: [{ label: "年齡差", width: 85, text: `兩人同長大，相差永遠是 ${gap} 歲`, color: "#736D71" }],
+          hintZh: `兩人每年一同長大 1 歲，年齡差距永遠不變，仍然是大 ${gap} 歲！`,
+          hintEn: `Both grow older together, the difference never changes: ${gap} years!`
+        };
+      },
+
+      shapes3d() {
+        return {
+          level: "3D 立體圖形：平面與曲面 · Flat & Curved Faces",
+          zh: "觀察一個標準「圓柱」（例如湯罐），它一共有多少個平面和多少個曲面？",
+          en: "How many flat faces and curved surfaces does a standard Cylinder have?",
+          options: ["2 個平面、1 個曲面", "1 個平面、2 個曲面", "6 個平面、0 個曲面", "0 個平面、1 個曲面"],
+          ans: "2 個平面、1 個曲面",
+          helperType: "threejs",
+          shapeKind: "cylinder",
+          hintZh: "圓柱頂和底各有 1 個圓形平面（共 2 個），中間可滾動的為 1 個曲面。",
+          hintEn: "A cylinder has 2 flat circular faces (top & bottom) and 1 curved surface."
+        };
+      }
+    };
+
+    /* ============================================================================
+       APPLICATION & STATE MANAGEMENT
+       ============================================================================ */
+    let currentMod = 'p1_num';
+    let langMode = 'bilingual';
+    let helperOpen = false;
+    let usedHelperThisQ = false;
+    let tfDots = Array(20).fill(0);
+    let printMode = 'current';
+
+    const questionHistory = { p1_num: [], p1_word: [], p2_adv: [], olympiad: [], shapes3d: [] };
+    const historyCursor = { p1_num: -1, p1_word: -1, p2_adv: -1, olympiad: -1, shapes3d: -1 };
+
+    let stats = JSON.parse(localStorage.getItem('redball_stats_v5') || '{"stars":0,"correct":0,"unassisted":0,"logicTotal":0,"logicCorrect":0,"hints":0}');
+
+    function saveStats() {
+      localStorage.setItem('redball_stats_v5', JSON.stringify(stats));
+      document.getElementById('starScore').innerText = stats.stars;
+    }
+
+    function getCurrentQuestion() {
+      return questionHistory[currentMod][historyCursor[currentMod]];
+    }
+
+    function generateAndPushQuestion() {
+      const newQ = ProceduralGenerator[currentMod]();
+      questionHistory[currentMod].push(newQ);
+      historyCursor[currentMod] = questionHistory[currentMod].length - 1;
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (historyCursor[currentMod] > 0) {
+        historyCursor[currentMod]--;
+        renderQuestion();
+      }
+    }
+
+    function selectModule(modKey) {
+      currentMod = modKey;
+      document.querySelectorAll('.mod-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab_${modKey}`).classList.add('active');
+      if (questionHistory[currentMod].length === 0) generateAndPushQuestion();
+      else renderQuestion();
+    }
+
+    function cycleLangMode() {
+      const modes = ['bilingual', 'zh', 'en'];
+      langMode = modes[(modes.indexOf(langMode) + 1) % modes.length];
+      const labels = { bilingual: '🌐 雙語 Bilingual', zh: '🇭🇰 繁體中文', en: '🇬🇧 English' };
+      document.getElementById('btnLangMode').innerText = labels[langMode];
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = getCurrentQuestion();
+      helperOpen = false;
+      usedHelperThisQ = false;
+      tfDots = Array(20).fill(0);
+      updateHelperDrawerUI();
+
+      const badge = document.getElementById('qBadge');
+      badge.innerText = q.level;
+      badge.className = q.isOlympiad ? 'level-pill olympiad' : 'level-pill';
+      document.getElementById('qProgress').innerText = `♾️ 動態生成 第 ${historyCursor[currentMod] + 1} 題`;
+      document.getElementById('btnPrevQ').disabled = (historyCursor[currentMod] <= 0);
+
+      const zhEl = document.getElementById('qTextZh');
+      const enEl = document.getElementById('qTextEn');
+      zhEl.style.display = (langMode === 'en') ? 'none' : 'block';
+      enEl.style.display = (langMode === 'zh') ? 'none' : 'block';
+      zhEl.innerText = q.zh;
+      enEl.innerText = q.en;
+
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkOption(btn, opt, q);
+        grid.appendChild(btn);
+      });
+
+      setRedBallSpeech(
+        langMode === 'en'
+          ? "Bouncy-bounce! Try solving on paper, or switch ON the visual helper below!"
+          : "Bouncy-bounce! 先自己動腦筋試下！撳「🖨️ 列印」仲可以隨時印出 A4 工作紙喺紙上面做！"
+      );
+    }
+
+    function toggleVisualHelper() {
+      helperOpen = !helperOpen;
+      if (helperOpen) usedHelperThisQ = true;
+      updateHelperDrawerUI();
+      if (helperOpen) renderManipulativeContent();
+    }
+
+    function updateHelperDrawerUI() {
+      const drawer = document.getElementById('manipulativeDrawer');
+      const btn = document.getElementById('btnToggleHelper');
+      const label = document.getElementById('helperLabelText');
+      if (helperOpen) {
+        drawer.classList.add('open');
+        btn.classList.remove('off-state');
+        btn.innerText = '🙈 隱藏輔助工具 Hide Helper';
+        label.innerText = '輔助工具已開啟 · Interactive Helper is ON';
+      } else {
+        drawer.classList.remove('open');
+        btn.classList.add('off-state');
+        btn.innerText = '👁️ 打開輔助工具 Show Helper';
+        label.innerText = '輔助工具（十格陣 / 條形圖）已隱藏，避免直接劇透答案 · Visual Helper is OFF';
+      }
+    }
+
+    function renderManipulativeContent() {
+      const q = getCurrentQuestion();
+      const container = document.getElementById('manipulativeContent');
+      container.innerHTML = '';
+
+      if (q.helperType === 'tenframe') {
+        const wrap = document.createElement('div');
+        wrap.className = 'ten-frame-stage';
+        wrap.innerHTML = `
+          <div style="font-size:0.9rem; font-weight:800; color:var(--text-muted); text-align:center;">
+            👆 點擊空格自己擺放波波（第 1 下綠色，第 2 下紅色，第 3 下清空）
+          </div>
+          <div class="frames-wrapper" id="tfFramesHolder"></div>
+        `;
+        container.appendChild(wrap);
+        const holder = document.getElementById('tfFramesHolder');
+        for (let f = 0; f < 2; f++) {
+          const box = document.createElement('div');
+          box.className = 'ten-frame-box';
+          for (let c = 0; c < 10; c++) {
+            const idx = f * 10 + c;
+            const cell = document.createElement('div');
+            cell.className = 'tf-cell';
+            if (tfDots[idx] === 1) cell.innerHTML = `<div class="tf-dot green-dot"></div>`;
+            else if (tfDots[idx] === 2) cell.innerHTML = `<div class="tf-dot coral-dot"></div>`;
+            cell.onclick = () => {
+              tfDots[idx] = (tfDots[idx] + 1) % 3;
+              renderManipulativeContent();
+            };
+            box.appendChild(cell);
+          }
+          holder.appendChild(box);
+        }
+      } else if (q.helperType === 'barmodel') {
+        const wrap = document.createElement('div');
+        wrap.className = 'bar-visualizer';
+        q.bars.forEach(b => {
+          const row = document.createElement('div');
+          row.className = 'bar-row';
+          row.innerHTML = `
+            <div class="bar-label">${b.label}</div>
+            <div class="bar-track">
+              <div class="bar-block" style="width:${b.width}%; background:${b.color};">${b.text}</div>
+            </div>
+          `;
+          wrap.appendChild(row);
+        });
+        container.appendChild(wrap);
+      }
+    }
+
+    function checkOption(btnEl, selectedVal, q) {
+      const isLogic = (currentMod === 'p1_word' || currentMod === 'olympiad');
+      if (selectedVal === q.ans) {
+        btnEl.classList.add('correct-choice');
+        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+        stats.stars++;
+        stats.correct++;
+        if (!usedHelperThisQ) stats.unassisted++;
+        if (isLogic) { stats.logicTotal++; stats.logicCorrect++; }
+        saveStats();
+        pokeRedBall();
+        const praise = (langMode === 'en') ? `Woohoo! ${selectedVal} is spot on!` : `好嘢！答案係 ${selectedVal}，完全正確！`;
+        setRedBallSpeech(praise);
+      } else {
+        btnEl.classList.add('wrong-choice');
+        btnEl.disabled = true;
+        stats.hints++;
+        if (isLogic) stats.logicTotal++;
+        saveStats();
+        const hint = (langMode === 'en') ? q.hintEn : q.hintZh;
+        setRedBallSpeech(hint);
+      }
+    }
+
+    function pokeRedBall() {
+      const svg = document.getElementById('redballSvg');
+      svg.classList.remove('super-bounce');
+      void svg.offsetWidth;
+      svg.classList.add('super-bounce');
+    }
+
+    function setRedBallSpeech(txt) {
+      document.getElementById('redballSpeech').innerText = txt;
+    }
+
+    function speakCurrentQuestion(langCode) {
+      const q = getCurrentQuestion();
+      const text = (langCode === 'en-US') ? q.en : q.zh;
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = langCode;
+      window.speechSynthesis.speak(utter);
+    }
+
+    /* ============================================================================
+       PRINT WORKSHEET SYSTEM
+       ============================================================================ */
+    function openPrintModal() {
+      document.getElementById('printModal').classList.add('active');
+    }
+
+    function closePrintModal() {
+      document.getElementById('printModal').classList.remove('active');
+    }
+
+    function setPrintMode(mode) {
+      printMode = mode;
+      document.getElementById('optPrintCurrent').classList.toggle('selected', mode === 'current');
+      document.getElementById('optPrint10').classList.toggle('selected', mode === '10mixed');
+      document.getElementById('optPrintCurrent').querySelector('span').innerText = (mode === 'current' ? '🔘' : '⚪');
+      document.getElementById('optPrint10').querySelector('span').innerText = (mode === '10mixed' ? '🔘' : '⚪');
+    }
+
+    function executePrintJob() {
+      closePrintModal();
+      const includeAnswers = document.getElementById('chkIncludeAnswers').checked;
+      let questionsToPrint = [];
+
+      if (printMode === 'current') {
+        questionsToPrint = [getCurrentQuestion()];
+      } else {
+        const mods = ['p1_num', 'p1_num', 'p1_word', 'p1_word', 'p2_adv', 'p2_adv', 'olympiad', 'olympiad', 'olympiad', 'shapes3d'];
+        questionsToPrint = mods.map(m => ProceduralGenerator[m]());
+      }
+
+      const container = document.getElementById('printWorksheetContainer');
+      container.innerHTML = '';
+
+      let html = `
+        <div class="ws-header">
+          <div>
+            <div class="ws-title">小學數學能力進階工作紙 · Math Exercise Worksheet</div>
+            <div style="font-size:10pt; color:#555;">Furry Red Ball Math Academy</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:14pt; font-weight:900; border:2px solid #000; padding:4px 14px; border-radius:4px;">
+              得分 Score: ________ / 100
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-meta-row">
+          <div>學生姓名 (Name): _______________________</div>
+          <div>班別 (Class): P. _____ ( )</div>
+          <div>日期 (Date): _________________</div>
+        </div>
+      `;
+
+      questionsToPrint.forEach((q, idx) => {
+        const isTenFrame = q.helperType === 'tenframe';
+        html += `
+          <div class="ws-item">
+            <div class="ws-q-num">第 ${idx + 1} 題 (${q.level}):</div>
+            <div class="ws-q-zh">${q.zh}</div>
+            <div class="ws-q-en">${q.en}</div>
+            
+            <div class="ws-work-box">
+              <div class="ws-scratchpad">
+                <b>算草欄 / 思考空間 (Working Area):</b>
+                ${isTenFrame ? `
+                  <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+                    <span>十格陣 (Ten-Frames):</span>
+                    <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
+                    <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
+                  </div>
+                ` : ''}
+              </div>
+              <div class="ws-ans-zone">
+                <div>橫式 (Equation): <span class="ws-line" style="min-width:110px;"></span></div>
+                <div>答 (Answer): <span class="ws-line"></span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (includeAnswers) {
+        html += `
+          <div class="page-break"></div>
+          <div class="ws-answers-header">
+            📋 教師 / 家長參考答案及解題要點 (Answer Key & Socratic Explanations)
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:10pt; line-height:1.5;">
+            <thead>
+              <tr style="background:#eee; text-align:left;">
+                <th style="border:1px solid #999; padding:6px; width:45px;">題號</th>
+                <th style="border:1px solid #999; padding:6px; width:130px;">範疇</th>
+                <th style="border:1px solid #999; padding:6px; width:140px;">參考答案 (Answer)</th>
+                <th style="border:1px solid #999; padding:6px;">解題思維點撥 (Teaching Clue)</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        questionsToPrint.forEach((q, idx) => {
+          html += `
+            <tr>
+              <td style="border:1px solid #999; padding:6px; font-weight:800; text-align:center;">${idx + 1}</td>
+              <td style="border:1px solid #999; padding:6px;">${q.level}</td>
+              <td style="border:1px solid #999; padding:6px; font-weight:900; color:#1d4ed8;">${q.ans}</td>
+              <td style="border:1px solid #999; padding:6px;">${q.hintZh}</td>
+            </tr>
+          `;
+        });
+        html += `
+            </tbody>
+          </table>
+          <div style="font-size:9pt; color:#666; margin-top:20px; text-align:center;">
+            Furry Red Ball Math Explorer · 建議引導孩子自主發現解難規律，避免直接背誦答案。
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    }
+
+    /* Diagnostics */
+    function openReportModal() {
+      document.getElementById('statCorrect').innerText = stats.correct;
+      document.getElementById('statUnassisted').innerText = stats.unassisted;
+      document.getElementById('statHints').innerText = stats.hints;
+      const rate = stats.logicTotal > 0 ? Math.round((stats.logicCorrect / stats.logicTotal) * 100) + '%' : '100%';
+      document.getElementById('statLogicRate').innerText = rate;
+      document.getElementById('reportModal').classList.add('active');
+    }
+
+    function closeReportModal() {
+      document.getElementById('reportModal').classList.remove('active');
+    }
+
+    function resetStats() {
+      stats = { stars: 0, correct: 0, unassisted: 0, logicTotal: 0, logicCorrect: 0, hints: 0 };
+      saveStats();
+      openReportModal();
+    }
+
+    window.onload = () => {
+      saveStats();
+      generateAndPushQuestion();
+    };
+  </script>
+</body>
+</html>
