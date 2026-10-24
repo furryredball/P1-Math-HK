@@ -6,7 +6,7 @@ Live site: **https://furryredball.github.io/P1-Math-HK/**
 
 ## What's inside
 
-Single-file app (`index.html`) — no build step, no dependencies beyond a CDN copy of three.js (used only for the 3D shapes module).
+Single-file app (`index.html`) — no build step, three.js is preloaded from CDN for a future 3D model viewer but is not yet wired up.
 
 | Module | 內容 | Focus |
 |---|---|---|
@@ -14,7 +14,7 @@ Single-file app (`index.html`) — no build step, no dependencies beyond a CDN c
 | 2 | P1/P2 雙語應用題 | Comparison traps, two-step word problems, HK money & change |
 | 3 | P2 乘除與退位 | 2-digit borrowing, multiplication as groups |
 | 4 | 🏆 奧數挑戰 | Queue overlap, sawing intervals, age invariance |
-| 5 | 3D 立體圖形 | Flat vs curved faces (3D viewer) |
+| 5 | 3D 立體圖形 | Flat vs curved faces (fixed quiz — no 3D model yet) |
 
 ## Features
 
