@@ -780,6 +780,25 @@
         page-break-before: always;
       }
 
+      .ws-mcq {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 18px;
+        margin: 6px 0 8px;
+        font-size: 11pt;
+        font-weight: 700;
+      }
+
+      .ws-mcq-circle {
+        display: inline-block;
+        width: 11px;
+        height: 11px;
+        border: 1.2px solid #000;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
       .ws-answers-header {
         font-size: 15pt;
         font-weight: 900;
@@ -1022,6 +1041,37 @@
       };
     }
 
+    /* ============================================================================
+       3D SHAPE KNOWLEDGE BASE (HK primary curriculum: 面 / 曲面 / 頂點 / 棱)
+       ============================================================================ */
+    const SHAPE_LIB = {
+      cylinder: { zh: "圓柱體", en: "Cylinder", itemZh: "湯罐", itemEn: "soup can",
+                  flat: 2, curved: 1, vertices: 0, edges: 0 },
+      cube:     { zh: "正方體", en: "Cube", itemZh: "骰子", itemEn: "dice",
+                  flat: 6, curved: 0, vertices: 8, edges: 12 },
+      cuboid:   { zh: "長方體", en: "Cuboid", itemZh: "紙巾盒", itemEn: "tissue box",
+                  flat: 6, curved: 0, vertices: 8, edges: 12 },
+      cone:     { zh: "圓錐體", en: "Cone", itemZh: "雪糕筒", itemEn: "ice-cream cone",
+                  flat: 1, curved: 1, vertices: 1, edges: 0 },
+      sphere:   { zh: "球體", en: "Sphere", itemZh: "足球", itemEn: "football",
+                  flat: 0, curved: 1, vertices: 0, edges: 0 },
+      pyramid:  { zh: "四角錐體", en: "Square Pyramid", itemZh: "金字塔", itemEn: "pyramid",
+                  flat: 5, curved: 0, vertices: 5, edges: 8 }
+    };
+    const SHAPE_KEYS = Object.keys(SHAPE_LIB);
+
+    function buildShapeNumOptions(correct) {
+      const set = new Set([correct]);
+      const cands = [correct + 1, correct - 1, correct + 2, correct - 2, 6, 8, 12, 5, 2, 1, 0, 3];
+      for (const c of cands) {
+        if (set.size === 4) break;
+        if (c >= 0) set.add(c);
+      }
+      let pad = 3;
+      while (set.size < 4) { set.add(correct + pad); pad++; }
+      return { ans: String(correct), options: shuffleArray(Array.from(set).map(String)) };
+    }
+
     const ProceduralGenerator = {
       p1_num() {
         const archetype = pickOne(['make10_add', 'break10_sub', 'missing_addend']);
@@ -1204,17 +1254,70 @@
       },
 
       shapes3d() {
-        return {
-          level: "3D 立體圖形：平面與曲面 · Flat & Curved Faces",
-          zh: "觀察一個標準「圓柱」（例如湯罐），它一共有多少個平面和多少個曲面？",
-          en: "How many flat faces and curved surfaces does a standard Cylinder have?",
-          options: ["2 個平面、1 個曲面", "1 個平面、2 個曲面", "6 個平面、0 個曲面", "0 個平面、1 個曲面"],
-          ans: "2 個平面、1 個曲面",
+        const key = pickOne(SHAPE_KEYS);
+        const s = SHAPE_LIB[key];
+        const archetype = pickOne(['flat', 'curved', 'vertices', 'edges', 'everyday']);
+        const base = {
           helperType: "threejs",
-          shapeKind: "cylinder",
-          hintZh: "圓柱頂和底各有 1 個圓形平面（共 2 個），中間可滾動的為 1 個曲面。",
-          hintEn: "A cylinder has 2 flat circular faces (top & bottom) and 1 curved surface."
+          shapeKey: key,
+          printOptions: true,
+          isOlympiad: false
         };
+        const factCardZh = `睇下 3D 圖形：${s.zh} 有 ${s.flat} 個平面、${s.curved} 個曲面、${s.vertices} 個頂點、${s.edges} 條棱。`;
+        const factCardEn = `Count it on the model: a ${s.en.toLowerCase()} has ${s.flat} flat face(s), ${s.curved} curved surface(s), ${s.vertices} vertex/vertices and ${s.edges} edge(s).`;
+
+        if (archetype === 'everyday') {
+          const ansStr = `${s.itemZh}（${s.itemEn}）`;
+          const distract = shuffleArray(SHAPE_KEYS.filter(k => k !== key))
+            .slice(0, 3)
+            .map(k => `${SHAPE_LIB[k].itemZh}（${SHAPE_LIB[k].itemEn}）`);
+          return Object.assign({}, base, {
+            level: "3D 圖形辨認 · Shape Recognition",
+            zh: `以下哪一件日常物件，形狀最接近「${s.zh}」？`,
+            en: `Which everyday object is closest in shape to a ${s.en.toLowerCase()}?`,
+            options: shuffleArray([ansStr, ...distract]),
+            ans: ansStr,
+            hintZh: `${s.zh} 的例子包括${s.itemZh}。${factCardZh}`,
+            hintEn: `A ${s.en.toLowerCase()} looks like a ${s.itemEn}. ${factCardEn}`
+          });
+        }
+
+        const asks = {
+          flat: {
+            level: "3D 立體圖形：平面數量 · Flat Faces",
+            zh: `「${s.zh}」一共有多少個平面？`,
+            en: `How many flat faces does a ${s.en.toLowerCase()} have?`,
+            n: s.flat
+          },
+          curved: {
+            level: "3D 立體圖形：曲面數量 · Curved Surfaces",
+            zh: `「${s.zh}」一共有多少個曲面？`,
+            en: `How many curved surfaces does a ${s.en.toLowerCase()} have?`,
+            n: s.curved
+          },
+          vertices: {
+            level: "3D 立體圖形：頂點數量 · Vertices",
+            zh: `「${s.zh}」一共有多少個頂點？`,
+            en: `How many vertices (corners) does a ${s.en.toLowerCase()} have?`,
+            n: s.vertices
+          },
+          edges: {
+            level: "3D 立體圖形：棱的數量 · Edges",
+            zh: `「${s.zh}」一共有多少條棱（直邊）？`,
+            en: `How many straight edges does a ${s.en.toLowerCase()} have?`,
+            n: s.edges
+          }
+        };
+        const a = asks[archetype];
+        const { ans, options } = buildShapeNumOptions(a.n);
+        return Object.assign({}, base, {
+          level: a.level,
+          zh: a.zh,
+          en: a.en,
+          options, ans,
+          hintZh: factCardZh,
+          hintEn: factCardEn
+        });
       }
     };
 
@@ -1274,6 +1377,7 @@
 
     function renderQuestion() {
       const q = getCurrentQuestion();
+      dispose3D();
       helperOpen = false;
       usedHelperThisQ = false;
       tfDots = Array(20).fill(0);
@@ -1329,13 +1433,205 @@
         drawer.classList.remove('open');
         btn.classList.add('off-state');
         btn.innerText = '👁️ 打開輔助工具 Show Helper';
-        label.innerText = '輔助工具（十格陣 / 條形圖）已隱藏，避免直接劇透答案 · Visual Helper is OFF';
+        label.innerText = '輔助工具（十格陣 / 條形圖 / 3D 立體圖）已隱藏，避免直接劇透答案 · Visual Helper is OFF';
+        dispose3D();
       }
+    }
+
+    /* ============================================================================
+       THREE.JS 3D SHAPE VIEWER  (with graceful SVG fallback)
+       ============================================================================ */
+    let threeState = null;
+
+    const SHAPE_COLOR = {
+      cylinder: 0x88cb9d, cube: 0xf2b880, cuboid: 0xe0a468,
+      cone: 0xd94e4e, sphere: 0x9bb7d4, pyramid: 0xc5b3e6
+    };
+
+    function dispose3D() {
+      if (!threeState) return;
+      try { cancelAnimationFrame(threeState.raf); } catch (e) { /* noop */ }
+      try { window.removeEventListener('resize', threeState.onResize); } catch (e) { /* noop */ }
+      try { threeState.renderer.dispose(); } catch (e) { /* noop */ }
+      try {
+        if (threeState.canvas && threeState.canvas.parentNode) {
+          threeState.canvas.parentNode.removeChild(threeState.canvas);
+        }
+      } catch (e) { /* noop */ }
+      threeState = null;
+    }
+
+    function shapeGeometry(key) {
+      switch (key) {
+        case 'cylinder': return new THREE.CylinderGeometry(1, 1, 1.9, 48);
+        case 'cube':     return new THREE.BoxGeometry(1.7, 1.7, 1.7);
+        case 'cuboid':   return new THREE.BoxGeometry(2.3, 1.2, 1.3);
+        case 'cone':     return new THREE.ConeGeometry(1.15, 2.1, 48);
+        case 'sphere':   return new THREE.SphereGeometry(1.25, 32, 24);
+        case 'pyramid':  return new THREE.ConeGeometry(1.4, 2.0, 4);
+        default:         return new THREE.BoxGeometry(1.5, 1.5, 1.5);
+      }
+    }
+
+    function shapeSvgFallback(key) {
+      const stroke = 'stroke="#3f7a36" stroke-width="2"';
+      const fillA = '#cfeeda', fillB = '#a9dcb9', fillC = '#88cb9d';
+      const wrap = (inner) => `<svg viewBox="0 0 200 200" style="width:100%;height:190px;display:block;margin:8px auto;" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+      switch (key) {
+        case 'cylinder':
+          return wrap(`
+            <path d="M45 55 L45 145 A55 18 0 0 0 155 145 L155 55 Z" fill="${fillB}" ${stroke}/>
+            <ellipse cx="100" cy="55" rx="55" ry="18" fill="${fillA}" ${stroke}/>`);
+        case 'cube':
+          return wrap(`
+            <polygon points="62,72 118,48 158,70 102,94" fill="${fillA}" ${stroke}/>
+            <polygon points="62,72 102,94 102,152 62,130" fill="${fillC}" ${stroke}/>
+            <polygon points="102,94 158,70 158,128 102,152" fill="${fillB}" ${stroke}/>`);
+        case 'cuboid':
+          return wrap(`
+            <polygon points="34,84 118,52 172,74 88,106" fill="${fillA}" ${stroke}/>
+            <polygon points="34,84 88,106 88,150 34,128" fill="${fillC}" ${stroke}/>
+            <polygon points="88,106 172,74 172,118 88,150" fill="${fillB}" ${stroke}/>`);
+        case 'cone':
+          return wrap(`
+            <ellipse cx="100" cy="146" rx="55" ry="18" fill="${fillA}" ${stroke}/>
+            <path d="M100 46 L155 146 A55 18 0 0 1 45 146 Z" fill="${fillB}" ${stroke}/>`);
+        case 'sphere':
+          return wrap(`
+            <circle cx="100" cy="100" r="56" fill="${fillC}" ${stroke}/>
+            <ellipse cx="100" cy="100" rx="56" ry="20" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>
+            <ellipse cx="100" cy="100" rx="22" ry="56" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>`);
+        case 'pyramid':
+          return wrap(`
+            <polygon points="100,44 42,150 100,168" fill="${fillC}" ${stroke}/>
+            <polygon points="100,44 158,150 100,168" fill="${fillB}" ${stroke}/>
+            <polyline points="42,150 100,132 158,150" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>`);
+        default:
+          return wrap(`<circle cx="100" cy="100" r="45" fill="${fillC}" ${stroke}/>`);
+      }
+    }
+
+    function render3DShape(key, container) {
+      dispose3D();
+      const s = SHAPE_LIB[key] || SHAPE_LIB.cube;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div style="font-size:0.88rem;font-weight:800;color:var(--text-muted);text-align:center;margin-bottom:8px;">
+          🖐️ 用手指／滑鼠拖動可以旋轉圖形 · Drag to rotate the shape
+        </div>
+        <div id="threeCanvasWrap"></div>
+        <div style="font-size:0.85rem;font-weight:800;color:var(--text-muted);text-align:center;margin-top:8px;">
+          ${s.zh} · ${s.en} — 平面 Flat ${s.flat} · 曲面 Curved ${s.curved} · 頂點 Vertices ${s.vertices} · 棱 Edges ${s.edges}
+        </div>
+      `;
+      container.appendChild(wrap);
+      const holder = wrap.querySelector('#threeCanvasWrap');
+      if (!holder) return;
+
+      if (typeof THREE === 'undefined') {
+        holder.innerHTML = shapeSvgFallback(key);
+        return;
+      }
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      } catch (err) {
+        holder.innerHTML = shapeSvgFallback(key) +
+          '<div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:0.76rem;font-weight:800;color:#999;">此裝置未支援立體顯示，已改用平面示意圖</div>';
+        return;
+      }
+
+      const w = holder.clientWidth || 600;
+      const h = holder.clientHeight || 250;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h);
+      renderer.setClearColor(0x000000, 0);
+      const dom = renderer.domElement;
+      dom.style.display = 'block';
+      dom.style.cursor = 'grab';
+      dom.style.touchAction = 'none';
+      holder.appendChild(dom);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+      camera.position.set(0, 0.7, 5.6);
+      camera.lookAt(0, 0, 0);
+
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e4e5, 0.95));
+      const key_l = new THREE.DirectionalLight(0xffffff, 0.7);
+      key_l.position.set(4, 6, 5);
+      scene.add(key_l);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.35);
+      rim.position.set(-5, -3, -4);
+      scene.add(rim);
+
+      const polyhedra = ['cube', 'cuboid', 'pyramid'];
+      const geo = shapeGeometry(key);
+      const mat = new THREE.MeshStandardMaterial({
+        color: SHAPE_COLOR[key] || 0x88cb9d,
+        roughness: 0.6,
+        metalness: 0.04,
+        flatShading: polyhedra.indexOf(key) !== -1
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.x = -0.12;
+      if (key === 'pyramid') mesh.rotation.y = Math.PI / 4;
+      scene.add(mesh);
+
+      if (polyhedra.indexOf(key) !== -1) {
+        mesh.add(new THREE.LineSegments(
+          new THREE.EdgesGeometry(geo, 15),
+          new THREE.LineBasicMaterial({ color: 0x3f7a36 })
+        ));
+      }
+
+      let dragging = false, prevX = 0, prevY = 0, spin = 0.01;
+      dom.addEventListener('pointerdown', (e) => {
+        dragging = true; prevX = e.clientX; prevY = e.clientY;
+        dom.style.cursor = 'grabbing';
+        try { dom.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+      });
+      dom.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - prevX, dy = e.clientY - prevY;
+        prevX = e.clientX; prevY = e.clientY;
+        mesh.rotation.y += dx * 0.013;
+        mesh.rotation.x = Math.max(-1.25, Math.min(1.25, mesh.rotation.x + dy * 0.013));
+      });
+      const stopDrag = (e) => {
+        dragging = false;
+        dom.style.cursor = 'grab';
+        try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* noop */ }
+      };
+      dom.addEventListener('pointerup', stopDrag);
+      dom.addEventListener('pointercancel', stopDrag);
+
+      const animate = () => {
+        if (!threeState || threeState.dom !== dom) return;
+        threeState.raf = requestAnimationFrame(animate);
+        if (!dragging) mesh.rotation.y += spin;
+        renderer.render(scene, camera);
+      };
+
+      const onResize = () => {
+        const nw = holder.clientWidth || w;
+        const nh = holder.clientHeight || h;
+        if (!nw || !nh) return;
+        renderer.setSize(nw, nh);
+        camera.aspect = nw / nh;
+        camera.updateProjectionMatrix();
+      };
+      window.addEventListener('resize', onResize);
+
+      threeState = { renderer, canvas: dom, dom, raf: 0, onResize };
+      animate();
     }
 
     function renderManipulativeContent() {
       const q = getCurrentQuestion();
       const container = document.getElementById('manipulativeContent');
+      dispose3D();
       container.innerHTML = '';
 
       if (q.helperType === 'tenframe') {
@@ -1381,6 +1677,8 @@
           wrap.appendChild(row);
         });
         container.appendChild(wrap);
+      } else if (q.helperType === 'threejs') {
+        render3DShape(q.shapeKey, container);
       }
     }
 
@@ -1485,11 +1783,20 @@
 
       questionsToPrint.forEach((q, idx) => {
         const isTenFrame = q.helperType === 'tenframe';
+        const mcqHtml = q.printOptions
+          ? '<div class="ws-mcq">' + q.options.map((o, oi) =>
+              '<span><span class="ws-mcq-circle"></span>' + 'ABCD'[oi] + '. ' + o + '</span>').join('') + '</div>'
+          : '';
+        const answerZone = q.printOptions
+          ? '<div>答 (Answer): <span class="ws-line"></span></div>'
+          : '<div>橫式 (Equation): <span class="ws-line" style="min-width:110px;"></span></div>' +
+            '<div>答 (Answer): <span class="ws-line"></span></div>';
         html += `
           <div class="ws-item">
             <div class="ws-q-num">第 ${idx + 1} 題 (${q.level}):</div>
             <div class="ws-q-zh">${q.zh}</div>
             <div class="ws-q-en">${q.en}</div>
+            ${mcqHtml}
             
             <div class="ws-work-box">
               <div class="ws-scratchpad">
@@ -1503,8 +1810,7 @@
                 ` : ''}
               </div>
               <div class="ws-ans-zone">
-                <div>橫式 (Equation): <span class="ws-line" style="min-width:110px;"></span></div>
-                <div>答 (Answer): <span class="ws-line"></span></div>
+                ${answerZone}
               </div>
             </div>
           </div>
