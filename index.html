@@ -1,2093 +1,2001 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Furry Red Ball Math Explorer | 動態題庫與工作紙 (P1-P2 & Olympiad)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chiron+Hei+HK:wght@400;600;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    :root {
-      /* Low-Stimulation Kid-Friendly Palette */
-      --primary-green: #529C47;
-      --primary-green-dark: #3f7a36;
-      --soft-mint: #88CB9D;
-      --soft-mint-light: #e3f3e8;
-      --warm-grey: #736D71;
-      --warm-grey-light: #e6e4e5;
-      --warm-cream: #FDEDE4;
-      --warm-cream-dark: #f5d8c8;
-      --card-bg: #FAF6F3;
-      --white: #FFFFFF;
-      --text-main: #403C3E;
-      --text-muted: #736D71;
-      --redball-color: #D94E4E;
-      --redball-light: #FDE8E8;
-      --shadow-soft: 0 8px 24px -4px rgba(115, 109, 113, 0.12);
-      --font-main: 'Nunito', 'Chiron Hei HK', -apple-system, BlinkMacSystemFont, "PingFang HK", sans-serif;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: var(--font-main);
-      background-color: var(--warm-cream);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .app-shell {
-      width: 100%;
-      max-width: 960px;
-      background: var(--card-bg);
-      border-radius: 28px;
-      box-shadow: var(--shadow-soft);
-      border: 3px solid var(--soft-mint);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 24px;
-    }
-
-    /* Top Header & Controls */
-    header {
-      background: var(--white);
-      padding: 16px 24px;
-      border-bottom: 2px solid var(--warm-cream-dark);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .redball-avatar-wrap {
-      width: 58px;
-      height: 58px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .redball-svg {
-      width: 54px;
-      height: 54px;
-      animation: gentleBounce 2.2s infinite ease-in-out;
-      transform-origin: bottom center;
-      filter: drop-shadow(0 4px 6px rgba(217, 78, 78, 0.25));
-    }
-
-    .redball-svg.super-bounce {
-      animation: excitedJump 0.55s cubic-bezier(0.28, 0.84, 0.42, 1) 2;
-    }
-
-    @keyframes gentleBounce {
-      0%, 100% { transform: translateY(0) scale(1, 1); }
-      50% { transform: translateY(-6px) scale(0.96, 1.04); }
-    }
-
-    @keyframes excitedJump {
-      0%, 100% { transform: translateY(0) scale(1, 1); }
-      30% { transform: translateY(4px) scale(1.12, 0.88); }
-      60% { transform: translateY(-16px) scale(0.92, 1.08); }
-    }
-
-    .brand-title h1 {
-      font-size: 1.3rem;
-      font-weight: 900;
-      color: var(--primary-green);
-      line-height: 1.2;
-    }
-
-    .brand-subtitle {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--warm-grey);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .pill-btn {
-      background: var(--warm-cream);
-      color: var(--text-main);
-      border: 2px solid var(--soft-mint);
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-    }
-
-    .pill-btn:hover {
-      background: var(--soft-mint-light);
-      border-color: var(--primary-green);
-    }
-
-    .pill-btn.active-lang {
-      background: var(--primary-green);
-      color: var(--white);
-      border-color: var(--primary-green);
-    }
-
-    .pill-btn.print-trigger {
-      background: #eff6ff;
-      border-color: #93c5fd;
-      color: #1d4ed8;
-    }
-
-    .pill-btn.print-trigger:hover {
-      background: #dbeafe;
-    }
-
-    .star-badge {
-      background: var(--soft-mint-light);
-      border: 2px solid var(--soft-mint);
-      color: var(--primary-green-dark);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Module Navigation Bar */
-    .module-nav {
-      display: flex;
-      background: var(--warm-cream);
-      padding: 10px 16px;
-      gap: 8px;
-      overflow-x: auto;
-      border-bottom: 2px solid var(--warm-cream-dark);
-    }
-
-    .mod-tab {
-      padding: 9px 16px;
-      border-radius: 14px;
-      border: 2px solid transparent;
-      background: rgba(255, 255, 255, 0.65);
-      color: var(--warm-grey);
-      font-weight: 800;
-      font-size: 0.88rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .mod-tab:hover {
-      background: var(--white);
-      color: var(--primary-green);
-    }
-
-    .mod-tab.active {
-      background: var(--primary-green);
-      color: var(--white);
-      box-shadow: 0 3px 8px rgba(82, 156, 71, 0.25);
-    }
-
-    /* Main Workspace Stage */
-    .stage-body {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .redball-dialogue {
-      background: var(--white);
-      border: 2px solid var(--soft-mint);
-      border-left: 7px solid var(--redball-color);
-      border-radius: 18px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .dialogue-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .speaker-tag {
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: var(--redball-color);
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .dialogue-text {
-      font-size: 1.02rem;
-      font-weight: 700;
-      color: var(--text-main);
-      line-height: 1.5;
-    }
-
-    .voice-btns {
-      display: flex;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .tts-mini-btn {
-      background: var(--soft-mint-light);
-      color: var(--primary-green-dark);
-      border: 1.5px solid var(--soft-mint);
-      padding: 6px 11px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .tts-mini-btn:hover {
-      background: var(--soft-mint);
-      color: var(--white);
-    }
-
-    /* Question Card */
-    .question-card {
-      background: var(--white);
-      border-radius: 22px;
-      padding: 22px 24px;
-      border: 2px solid var(--warm-grey-light);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
-    }
-
-    .q-meta-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .level-pill {
-      background: var(--soft-mint-light);
-      color: var(--primary-green-dark);
-      padding: 4px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 900;
-    }
-
-    .level-pill.olympiad {
-      background: var(--redball-light);
-      color: #B83B3B;
-    }
-
-    .infinite-badge {
-      background: var(--warm-cream);
-      color: var(--warm-grey);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 900;
-      border: 1px solid var(--warm-grey-light);
-    }
-
-    .q-text-zh {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.65;
-      margin-bottom: 6px;
-    }
-
-    .q-text-en {
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--warm-grey);
-      line-height: 1.5;
-    }
-
-    /* Switchable Visual Tool Bar */
-    .helper-toggle-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--soft-mint-light);
-      border: 2px dashed var(--primary-green);
-      padding: 10px 18px;
-      border-radius: 16px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .helper-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.92rem;
-      font-weight: 800;
-      color: var(--primary-green-dark);
-    }
-
-    .switch-btn {
-      background: var(--primary-green);
-      color: var(--white);
-      border: none;
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .switch-btn.off-state {
-      background: var(--warm-grey);
-    }
-
-    .manipulative-drawer {
-      display: none;
-      background: var(--white);
-      border-radius: 20px;
-      padding: 20px;
-      border: 2px solid var(--soft-mint);
-      animation: slideDown 0.25s ease-out;
-    }
-
-    .manipulative-drawer.open {
-      display: block;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .ten-frame-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .frames-wrapper {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .ten-frame-box {
-      display: grid;
-      grid-template-columns: repeat(5, 46px);
-      grid-template-rows: repeat(2, 46px);
-      gap: 6px;
-      background: var(--warm-cream);
-      padding: 10px;
-      border-radius: 14px;
-      border: 2px solid var(--warm-grey);
-    }
-
-    .tf-cell {
-      width: 46px;
-      height: 46px;
-      background: var(--white);
-      border-radius: 10px;
-      border: 1.5px solid #d4d0d2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .tf-cell:hover {
-      border-color: var(--primary-green);
-    }
-
-    .tf-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .tf-dot.green-dot {
-      background: var(--primary-green);
-      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
-    }
-
-    .tf-dot.coral-dot {
-      background: var(--redball-color);
-      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
-    }
-
-    .bar-visualizer {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 10px;
-    }
-
-    .bar-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .bar-label {
-      min-width: 125px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      text-align: right;
-      color: var(--text-main);
-    }
-
-    .bar-track {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
-    .bar-block {
-      min-height: 38px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 0.92rem;
-      color: var(--white);
-      padding: 6px 12px;
-      transition: all 0.4s ease;
-    }
-
-    #threeCanvasWrap {
-      width: 100%;
-      height: 250px;
-      background: var(--warm-cream);
-      border-radius: 16px;
-      position: relative;
-      overflow: hidden;
-      border: 2px solid var(--warm-grey-light);
-    }
-
-    .three-single {
-      width: 100%;
-      height: 250px;
-      background: var(--warm-cream);
-      border-radius: 16px;
-      position: relative;
-      overflow: hidden;
-      border: 2px solid var(--warm-grey-light);
-    }
-
-    .three-gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
-      gap: 10px;
-    }
-
-    .three-tile {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .three-tile-box {
-      height: 150px;
-      background: var(--warm-cream);
-      border-radius: 14px;
-      border: 2px solid var(--warm-grey-light);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .three-tile-label {
-      text-align: center;
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
-
-    .three-tile-label-en {
-      text-align: center;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--warm-grey);
-    }
-
-    /* Options Grid */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .option-btn {
-      background: var(--white);
-      border: 2.5px solid var(--warm-grey-light);
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 1.2rem;
-      font-weight: 900;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .option-btn:hover:not(:disabled) {
-      border-color: var(--primary-green);
-      background: var(--soft-mint-light);
-      transform: translateY(-2px);
-    }
-
-    .option-btn.wrong-choice {
-      background: #f2ecee;
-      border-color: var(--warm-grey);
-      color: var(--warm-grey);
-      text-decoration: line-through;
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .option-btn.correct-choice {
-      background: var(--primary-green);
-      border-color: var(--primary-green-dark);
-      color: var(--white);
-    }
-
-    footer {
-      background: var(--white);
-      padding: 16px 24px;
-      border-top: 2px solid var(--warm-cream-dark);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .nav-btn {
-      background: var(--primary-green);
-      color: var(--white);
-      border: none;
-      padding: 11px 22px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .nav-btn:hover:not(:disabled) { background: var(--primary-green-dark); }
-    .nav-btn:active:not(:disabled) { transform: scale(0.97); }
-    .nav-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .nav-btn.secondary {
-      background: var(--warm-cream);
-      color: var(--text-main);
-      border: 2px solid var(--warm-grey-light);
-    }
-
-    /* Modals (Parent Report & Print Setup) */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(64, 60, 62, 0.55);
-      backdrop-filter: blur(3px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 200;
-    }
-
-    .modal-overlay.active { display: flex; }
-
-    .modal-box {
-      background: var(--card-bg);
-      border: 3px solid var(--soft-mint);
-      border-radius: 24px;
-      max-width: 580px;
-      width: 100%;
-      padding: 28px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .stat-card {
-      background: var(--white);
-      padding: 14px;
-      border-radius: 14px;
-      border: 1.5px solid var(--warm-grey-light);
-    }
-
-    .stat-val {
-      font-size: 1.5rem;
-      font-weight: 900;
-      color: var(--primary-green);
-    }
-
-    /* Print Setup Radio Cards */
-    .print-mode-card {
-      background: var(--white);
-      border: 2px solid var(--warm-grey-light);
-      border-radius: 16px;
-      padding: 14px 18px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.15s;
-    }
-
-    .print-mode-card:hover {
-      border-color: var(--primary-green);
-      background: var(--soft-mint-light);
-    }
-
-    .print-mode-card.selected {
-      border-color: var(--primary-green);
-      background: var(--soft-mint-light);
-      box-shadow: 0 0 0 2px var(--primary-green);
-    }
-
-    /* ============================================================================
-       PRINT-ONLY WORKSHEET TEMPLATE & CSS (@media print)
-       ============================================================================ */
-    #printWorksheetContainer {
-      display: none;
-      width: 100%;
-      background: #fff;
-    }
-
-    @media print {
-      @page {
-        size: A4 portrait;
-        margin: 12mm 15mm;
-      }
-
-      body {
-        background: #fff !important;
-        color: #000 !important;
-        padding: 0 !important;
-      }
-
-      /* Hide interactive app shell */
-      .app-shell, .modal-overlay, footer {
-        display: none !important;
-      }
-
-      /* Show clean printable worksheet */
-      #printWorksheetContainer {
-        display: block !important;
-      }
-
-      .ws-header {
-        border-bottom: 2px solid #000;
-        padding-bottom: 8px;
-        margin-bottom: 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-      }
-
-      .ws-title {
-        font-size: 18pt;
-        font-weight: 900;
-        letter-spacing: 0.5px;
-      }
-
-      .ws-meta-row {
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px dashed #666;
-        padding: 8px 0;
-        margin-bottom: 16px;
-        font-size: 11pt;
-        font-weight: 700;
-      }
-
-      .ws-item {
-        page-break-inside: avoid;
-        margin-bottom: 20px;
-        padding-bottom: 14px;
-        border-bottom: 1px solid #ddd;
-      }
-
-      .ws-q-num {
-        font-weight: 900;
-        font-size: 12pt;
-      }
-
-      .ws-q-zh {
-        font-size: 13pt;
-        font-weight: 800;
-        line-height: 1.6;
-        margin: 4px 0;
-      }
-
-      .ws-q-en {
-        font-size: 10pt;
-        font-weight: 600;
-        color: #444;
-        margin-bottom: 10px;
-      }
-
-      .ws-work-box {
-        display: flex;
-        gap: 16px;
-        margin-top: 8px;
-      }
-
-      .ws-scratchpad {
-        flex: 1;
-        height: 80px;
-        border: 1px dashed #999;
-        border-radius: 6px;
-        padding: 6px;
-        font-size: 9pt;
-        color: #888;
-      }
-
-      .ws-ans-zone {
-        width: 220px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        gap: 8px;
-        font-size: 11pt;
-        font-weight: 800;
-      }
-
-      .ws-line {
-        border-bottom: 1.5px solid #000;
-        display: inline-block;
-        min-width: 90px;
-        margin: 0 4px;
-      }
-
-      .ws-print-tenframe {
-        display: inline-grid;
-        grid-template-columns: repeat(5, 20px);
-        grid-template-rows: repeat(2, 20px);
-        gap: 2px;
-        border: 1px solid #000;
-        padding: 2px;
-        margin-right: 8px;
-      }
-
-      .ws-print-tf-cell {
-        border: 1px solid #aaa;
-        width: 20px;
-        height: 20px;
-      }
-
-      .page-break {
-        page-break-before: always;
-      }
-
-      .ws-mcq {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px 18px;
-        margin: 6px 0 8px;
-        font-size: 11pt;
-        font-weight: 700;
-      }
-
-      .ws-mcq-circle {
-        display: inline-block;
-        width: 11px;
-        height: 11px;
-        border: 1.2px solid #000;
-        border-radius: 50%;
-        margin-right: 6px;
-        vertical-align: middle;
-      }
-
-      .ws-answers-header {
-        font-size: 15pt;
-        font-weight: 900;
-        margin-top: 20px;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 4px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Furry Red Ball Math Explorer | P1–P2 Helpers & Worksheets</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+Hei+HK:wght@400;600;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+:root{
+  --primary-green:#529C47;
+  --primary-green-dark:#3f7a36;
+  --soft-mint:#88CB9D;
+  --soft-mint-light:#e3f3e8;
+  --warm-grey:#736D71;
+  --warm-grey-light:#e6e4e5;
+  --warm-cream:#FDEDE4;
+  --warm-cream-dark:#f5d8c8;
+  --card-bg:#FAF6F3;
+  --white:#fff;
+  --text-main:#403C3E;
+  --text-muted:#736D71;
+  --redball-color:#D94E4E;
+  --redball-light:#FDE8E8;
+  --shadow-soft:0 8px 24px -4px rgba(115,109,113,.12);
+  --font-main:'Nunito','Chiron Hei HK',-apple-system,BlinkMacSystemFont,"PingFang HK",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{
+  font-family:var(--font-main);
+  background:var(--warm-cream);
+  color:var(--text-main);
+  min-height:100vh;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+button:focus-visible,input:focus-visible{
+  outline:3px solid #1565c0;
+  outline-offset:3px;
+}
+.app-shell{
+  width:100%;max-width:960px;background:var(--card-bg);
+  border-radius:28px;box-shadow:var(--shadow-soft);
+  border:3px solid var(--soft-mint);overflow:hidden;margin-bottom:24px;
+}
+header{
+  background:#fff;padding:16px 24px;
+  border-bottom:2px solid var(--warm-cream-dark);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;
+}
+.brand-group{display:flex;align-items:center;gap:14px}
+.redball-avatar-wrap{
+  width:58px;height:58px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border:0;background:none;padding:0;
+}
+.redball-svg{
+  width:54px;height:54px;
+  animation:gentleBounce 2.2s infinite ease-in-out;
+  transform-origin:bottom center;
+  filter:drop-shadow(0 4px 6px rgba(217,78,78,.25));
+}
+.redball-svg.super-bounce{animation:excitedJump .55s ease-in-out 2}
+@keyframes gentleBounce{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-6px) scale(.96,1.04)}
+}
+@keyframes excitedJump{
+  0%,100%{transform:translateY(0)}
+  30%{transform:translateY(4px) scale(1.12,.88)}
+  60%{transform:translateY(-16px) scale(.92,1.08)}
+}
+.brand-title h1{
+  font-size:1.3rem;font-weight:900;
+  color:var(--primary-green);line-height:1.2;
+}
+.brand-subtitle{font-size:.82rem;font-weight:700;color:var(--warm-grey)}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill-btn{
+  background:var(--warm-cream);color:var(--text-main);
+  border:2px solid var(--soft-mint);padding:7px 14px;
+  border-radius:999px;font-size:.85rem;font-weight:800;
+}
+.pill-btn:hover{background:var(--soft-mint-light)}
+.pill-btn.active-lang{
+  background:var(--primary-green);color:#fff;border-color:var(--primary-green);
+}
+.pill-btn.print-trigger{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+.star-badge{
+  background:var(--soft-mint-light);border:2px solid var(--soft-mint);
+  color:var(--primary-green-dark);padding:6px 14px;
+  border-radius:999px;font-weight:900;
+}
+.module-nav{
+  display:flex;background:var(--warm-cream);padding:10px 16px;gap:8px;
+  overflow-x:auto;border-bottom:2px solid var(--warm-cream-dark);
+}
+.mod-tab{
+  padding:9px 16px;border-radius:14px;border:2px solid transparent;
+  background:rgba(255,255,255,.7);color:var(--warm-grey);
+  font-weight:800;font-size:.88rem;white-space:nowrap;
+}
+.mod-tab:hover{background:#fff;color:var(--primary-green)}
+.mod-tab.active{background:var(--primary-green);color:#fff}
+
+.stage-body{padding:24px;display:flex;flex-direction:column;gap:18px}
+.redball-dialogue{
+  background:#fff;border:2px solid var(--soft-mint);
+  border-left:7px solid var(--redball-color);border-radius:18px;
+  padding:14px 18px;display:flex;align-items:center;
+  justify-content:space-between;gap:14px;
+}
+.speaker-tag{
+  font-size:.85rem;font-weight:900;color:var(--redball-color);
+  display:block;margin-bottom:2px;
+}
+.dialogue-text{font-size:1.02rem;font-weight:700;line-height:1.5;white-space:pre-line}
+.voice-btns{display:flex;gap:6px;flex-shrink:0}
+.tts-mini-btn{
+  background:var(--soft-mint-light);color:var(--primary-green-dark);
+  border:1.5px solid var(--soft-mint);padding:6px 11px;
+  border-radius:10px;font-size:.8rem;font-weight:800;
+}
+.question-card{
+  background:#fff;border-radius:22px;padding:22px 24px;
+  border:2px solid var(--warm-grey-light);
+}
+.q-meta-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;flex-wrap:wrap;gap:8px;
+}
+.level-pill{
+  background:var(--soft-mint-light);color:var(--primary-green-dark);
+  padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:900;
+}
+.level-pill.olympiad{background:var(--redball-light);color:#B83B3B}
+.infinite-badge{
+  background:var(--warm-cream);color:var(--warm-grey);padding:4px 10px;
+  border-radius:8px;font-size:.78rem;font-weight:900;
+  border:1px solid var(--warm-grey-light);
+}
+.q-text-zh{font-size:1.45rem;font-weight:800;line-height:1.65;margin-bottom:6px}
+.q-text-en{font-size:1.08rem;font-weight:700;color:var(--warm-grey);line-height:1.5}
+
+.p2-topic-panel{
+  background:#fff;border:2px solid var(--soft-mint);
+  border-radius:16px;padding:14px;
+}
+.p2-topic-title{font-weight:900;color:var(--primary-green-dark);margin-bottom:10px}
+.p2-topic-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.p2-topic-btn{
+  padding:9px 12px;border-radius:10px;background:#fff;
+  border:2px solid var(--warm-grey-light);
+  font-size:.86rem;font-weight:800;color:var(--text-main);
+}
+.p2-topic-btn[aria-pressed="true"]{
+  background:var(--primary-green);border-color:var(--primary-green);color:#fff;
+}
+.p2-topic-note{font-size:.82rem;color:var(--text-muted);margin-top:10px;line-height:1.5}
+
+.helper-toggle-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--soft-mint-light);border:2px dashed var(--primary-green);
+  padding:10px 18px;border-radius:16px;flex-wrap:wrap;gap:10px;
+}
+.helper-info{font-size:.92rem;font-weight:800;color:var(--primary-green-dark)}
+.switch-btn{
+  background:var(--primary-green);color:#fff;border:0;
+  padding:8px 16px;border-radius:12px;font-weight:800;font-size:.88rem;
+}
+.switch-btn.off-state{background:var(--warm-grey)}
+.manipulative-drawer{
+  background:#fff;border-radius:20px;padding:20px;
+  border:2px solid var(--soft-mint);
+}
+.helper-guidance{
+  font-weight:800;line-height:1.6;color:var(--primary-green-dark);
+  margin-bottom:12px;white-space:pre-line;
+}
+.helper-note{font-size:.85rem;line-height:1.5;color:var(--text-muted);white-space:pre-line}
+
+/* Original ten-frame and bar-model tools */
+.ten-frame-stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.frames-wrapper{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.ten-frame-box{
+  display:grid;grid-template-columns:repeat(5,40px);
+  grid-template-rows:repeat(2,40px);gap:5px;
+  background:var(--warm-cream);padding:8px;border-radius:14px;
+  border:2px solid var(--warm-grey);
+}
+.tf-cell{
+  width:40px;height:40px;background:#fff;border-radius:8px;
+  border:1.5px solid #d4d0d2;display:flex;align-items:center;justify-content:center;
+}
+.tf-dot{width:28px;height:28px;border-radius:50%}
+.green-dot{background:var(--primary-green)}
+.coral-dot{background:var(--redball-color)}
+.bar-visualizer{display:flex;flex-direction:column;gap:14px;padding:10px 0}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-label{min-width:90px;font-weight:800;font-size:.9rem;text-align:right}
+.bar-track{flex:1;min-width:0}
+.bar-block{
+  min-height:38px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-weight:900;font-size:.92rem;
+  color:#fff;padding:8px;min-width:90px;
+}
+
+/* Integrated P2 manipulatives: prefixed to avoid base-style collisions */
+.p2-msg{font-size:1.12rem;font-weight:800;line-height:1.6;white-space:pre-line}
+.p2-stage{
+  display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;
+  min-height:100px;padding:16px 0;
+}
+.p2-col{text-align:center}
+.p2-label{font-size:.86rem;color:var(--text-muted);margin-top:8px;font-weight:800}
+.p2-rods{display:flex;gap:4px;align-items:flex-end;min-height:110px;flex-wrap:wrap}
+.p2-rod{
+  display:flex;flex-direction:column;gap:1px;
+  border:2px solid #1565c0;border-radius:4px;padding:2px;background:#e3f2fd;
+}
+.p2-rod i{width:15px;height:8px;background:#42a5f5;display:block}
+.p2-ones{display:grid;grid-template-columns:repeat(5,24px);gap:4px;min-height:24px}
+.p2-cube{width:24px;height:24px;background:#ffb300;border:2px solid #e65100;border-radius:4px}
+.p2-cube.new{background:#81d4fa;border-color:#0277bd}
+.p2-gone{opacity:.25;filter:grayscale(1);position:relative}
+.p2-gone::after{
+  content:"";position:absolute;top:50%;left:0;right:0;
+  height:2px;background:#333;transform:rotate(-25deg);
+}
+.p2-groupbox{width:120px;text-align:center}
+.p2-group,.p2-plate{
+  border:3px dashed var(--primary-green);border-radius:22px;
+  padding:10px;min-height:92px;display:flex;flex-wrap:wrap;
+  gap:4px;justify-content:center;align-items:center;font-size:23px;
+}
+.p2-group.empty{color:#888;border-color:#aaa}
+.p2-plate{border:3px solid #8d6e63;background:#fffaf5;border-radius:45%}
+.p2-caption{
+  margin-top:6px;font-size:.82rem;color:var(--primary-green-dark);
+  font-weight:800;white-space:pre-line;
+}
+.p2-token{display:inline-block}
+.p2-pool{border:2px solid #bbb;border-radius:10px;padding:10px;width:100%;background:#fff}
+.p2-pool-label{font-size:.9rem;font-weight:800;margin-bottom:6px}
+.p2-pool-items{display:flex;flex-wrap:wrap;gap:4px;font-size:23px;min-height:30px}
+.p2-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.p2-step-btn{
+  padding:10px 14px;border-radius:10px;border:2px solid var(--primary-green);
+  background:var(--primary-green);color:#fff;font-weight:800;
+}
+.p2-step-btn.secondary{background:#fff;color:var(--primary-green-dark)}
+
+/* 3D tools */
+.three-single,.three-tile-box{
+  width:100%;height:250px;background:var(--warm-cream);
+  border-radius:16px;position:relative;overflow:hidden;
+  border:2px solid var(--warm-grey-light);
+}
+.three-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.three-tile{min-width:0}
+.three-tile-box{height:165px}
+.three-tile-label{text-align:center;font-size:.88rem;font-weight:900;margin-top:6px}
+.shape-svg{width:100%;height:100%;display:block}
+.three-facts{font-size:.88rem;line-height:1.6;text-align:center;margin-top:8px}
+
+.options-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:8px;
+}
+.option-btn{
+  background:#fff;border:2.5px solid var(--warm-grey-light);border-radius:16px;
+  padding:16px 10px;font-size:1.15rem;font-weight:900;color:var(--text-main);
+  overflow-wrap:anywhere;
+}
+.option-btn:hover:not(:disabled){border-color:var(--primary-green);background:var(--soft-mint-light)}
+.option-btn.wrong-choice{
+  background:#f2ecee;border-color:var(--warm-grey);color:var(--warm-grey);
+}
+.option-btn.correct-choice{
+  background:var(--primary-green);border-color:var(--primary-green-dark);color:#fff;
+}
+footer{
+  background:#fff;padding:16px 24px;border-top:2px solid var(--warm-cream-dark);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.nav-btn{
+  background:var(--primary-green);color:#fff;border:2px solid var(--primary-green);
+  padding:10px 18px;border-radius:14px;font-weight:800;font-size:.95rem;
+}
+.nav-btn:hover:not(:disabled){background:var(--primary-green-dark)}
+.nav-btn:disabled{opacity:.45}
+.nav-btn.secondary{background:var(--warm-cream);color:var(--text-main);border-color:var(--warm-grey-light)}
+.footer-note{font-size:.8rem;font-weight:800;color:var(--warm-grey)}
+
+/* Modals */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(64,60,62,.55);
+  display:none;align-items:center;justify-content:center;padding:16px;z-index:200;
+}
+.modal-overlay.active{display:flex}
+.modal-box{
+  background:var(--card-bg);border:3px solid var(--soft-mint);
+  border-radius:24px;max-width:620px;width:100%;padding:24px;
+  max-height:90vh;overflow:auto;box-shadow:var(--shadow-soft);
+}
+.modal-box h2{color:var(--primary-green);font-weight:900;margin-bottom:8px}
+.modal-description{font-size:.9rem;line-height:1.5;color:var(--warm-grey);margin-bottom:16px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:20px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.stat-card{background:#fff;padding:14px;border-radius:14px;border:1.5px solid var(--warm-grey-light)}
+.stat-title{font-size:.82rem;font-weight:800;color:var(--warm-grey)}
+.stat-val{font-size:1.5rem;font-weight:900;color:var(--primary-green)}
+.print-mode-card{
+  background:#fff;border:2px solid var(--warm-grey-light);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+  display:flex;align-items:flex-start;gap:10px;cursor:pointer;
+}
+.print-mode-card:has(input:checked){border-color:var(--primary-green);background:var(--soft-mint-light)}
+.print-mode-card input{margin-top:5px}
+.print-mode-card strong{display:block}
+.print-mode-card small{display:block;color:var(--text-muted);line-height:1.5;margin-top:4px}
+.check-row{display:flex;align-items:flex-start;gap:8px;margin:16px 0;font-weight:800;line-height:1.5}
+.check-row input{margin-top:5px}
+#printWorksheetContainer{display:none}
+#storageNotice{font-size:.8rem;color:#8e4035;margin-top:6px}
+
+@media(max-width:640px){
+  body{padding:8px}
+  header,.stage-body,footer{padding:14px}
+  .question-card{padding:16px}
+  .redball-dialogue{align-items:flex-start;flex-wrap:wrap}
+  .options-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bar-row{align-items:flex-start;flex-direction:column;gap:5px}
+  .bar-track{width:100%}
+  .bar-label{text-align:left}
+  .p2-topic-btn{flex:1 1 40%}
+  .manipulative-drawer{padding:12px}
+  .q-text-zh{font-size:1.25rem}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* A4 worksheets */
+@media print{
+  @page{size:A4 portrait;margin:12mm 15mm}
+  body{display:block;background:#fff!important;color:#000!important;padding:0!important}
+  .app-shell,.modal-overlay{display:none!important}
+  #printWorksheetContainer{display:block!important;width:100%;background:#fff}
+  .ws-header{
+    border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px;
+    display:flex;justify-content:space-between;gap:15px;align-items:flex-end;
+  }
+  .ws-title{font-size:17pt;font-weight:900}
+  .ws-meta-row{
+    display:flex;justify-content:space-between;border-bottom:1px dashed #666;
+    padding:8px 0;margin-bottom:16px;font-size:10pt;font-weight:700;gap:10px;
+  }
+  .ws-item{break-inside:avoid;page-break-inside:avoid;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #ddd}
+  .ws-q-num{font-weight:900;font-size:10pt}
+  .ws-q-zh{font-size:12pt;font-weight:800;line-height:1.6;margin:4px 0}
+  .ws-q-en{font-size:10pt;color:#444;margin-bottom:10px}
+  .ws-work-box{display:flex;gap:12px;margin-top:8px}
+  .ws-scratchpad{
+    flex:1;min-width:0;height:90px;border:1px dashed #999;border-radius:6px;
+    padding:6px;font-size:9pt;color:#666;
+  }
+  .ws-ans-zone{width:190px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;font-size:10pt;font-weight:800}
+  .ws-line{border-bottom:1.5px solid #000;display:inline-block;min-width:85px;margin:0 4px}
+  .ws-print-tenframe{
+    display:inline-grid;grid-template-columns:repeat(5,17px);grid-template-rows:repeat(2,17px);
+    gap:2px;border:1px solid #000;padding:2px;margin:6px 6px 0 0;
+  }
+  .ws-print-tf-cell{border:1px solid #aaa;width:17px;height:17px}
+  .ws-mcq{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;margin:8px 0;font-size:10pt}
+  .ws-mcq-circle{display:inline-block;width:10px;height:10px;border:1px solid #000;border-radius:50%;margin-right:5px}
+  .ws-answer-page{break-before:page;page-break-before:always}
+  .ws-answers-header{font-size:15pt;font-weight:900;margin:10px 0 12px;border-bottom:2px solid #000;padding-bottom:6px}
+  .ws-answer-table{width:100%;border-collapse:collapse;font-size:9pt;line-height:1.5}
+  .ws-answer-table th,.ws-answer-table td{border:1px solid #999;padding:6px;text-align:left;vertical-align:top}
+  .ws-answer-table tr{break-inside:avoid;page-break-inside:avoid}
+  .ws-answer-table thead{display:table-header-group}
+}
+</style>
 </head>
+
 <body>
-
-  <!-- Screen Application Shell -->
-  <div class="app-shell">
-    <header>
-      <div class="brand-group">
-        <div class="redball-avatar-wrap" onclick="pokeRedBall()" title="Tap Furry Red Ball!">
-          <svg class="redball-svg" id="redballSvg" viewBox="0 0 100 100">
-            <path d="M50 6 L57 11 L65 7 L69 14 L78 13 L79 21 L88 23 L86 32 L93 37 L89 45 L95 52 L88 59 L92 67 L84 72 L85 80 L76 82 L74 90 L65 88 L59 95 L50 91 L41 95 L35 88 L26 90 L24 82 L15 80 L16 72 L8 67 L12 59 L5 52 L11 45 L7 37 L14 32 L12 23 L21 21 L22 13 L31 14 L35 7 L43 11 Z" fill="#D94E4E" stroke="#B83B3B" stroke-width="2.5" stroke-linejoin="round"/>
-            <ellipse cx="38" cy="30" rx="14" ry="8" transform="rotate(-20 38 30)" fill="#F07878" opacity="0.5"/>
-            <circle cx="37" cy="46" r="9.5" fill="#FFFFFF"/>
-            <circle cx="63" cy="46" r="9.5" fill="#FFFFFF"/>
-            <circle cx="39" cy="46" r="5" fill="#2B282A"/>
-            <circle cx="61" cy="46" r="5" fill="#2B282A"/>
-            <circle cx="41" cy="43" r="2" fill="#FFFFFF"/>
-            <circle cx="63" cy="43" r="2" fill="#FFFFFF"/>
-            <path d="M 43 60 Q 50 67 57 60" fill="none" stroke="#2B282A" stroke-width="3.5" stroke-linecap="round"/>
-            <ellipse cx="26" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity="0.7"/>
-            <ellipse cx="74" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity="0.7"/>
-          </svg>
-        </div>
-        <div class="brand-title">
-          <h1>Furry Red Ball Math Explorer</h1>
-          <div class="brand-subtitle">動態題庫 · P1–P2 雙語互動與工作紙列印系統 (Worksheet Ready)</div>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <button class="pill-btn print-trigger" onclick="openPrintModal()">
-          🖨️ 列印工作紙 Print
-        </button>
-        <button class="pill-btn active-lang" id="btnLangMode" onclick="cycleLangMode()">
-          🌐 雙語 Bilingual
-        </button>
-        <button class="pill-btn" onclick="openReportModal()">
-          📊 報告 Report
-        </button>
-        <div class="star-badge">
-          <span>⭐</span>
-          <span id="starScore">0</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Navigation Tabs -->
-    <nav class="module-nav">
-      <button class="mod-tab active" onclick="selectModule('p1_num')" id="tab_p1_num">
-        1. P1 加減與十格陣 (Add/Sub)
+<div class="app-shell">
+  <header>
+    <div class="brand-group">
+      <button class="redball-avatar-wrap" onclick="pokeRedBall()" aria-label="Tap Furry Red Ball">
+        <svg class="redball-svg" id="redballSvg" viewBox="0 0 100 100" aria-hidden="true">
+          <path d="M50 6 L57 11 L65 7 L69 14 L78 13 L79 21 L88 23 L86 32 L93 37 L89 45 L95 52 L88 59 L92 67 L84 72 L85 80 L76 82 L74 90 L65 88 L59 95 L50 91 L41 95 L35 88 L26 90 L24 82 L15 80 L16 72 L8 67 L12 59 L5 52 L11 45 L7 37 L14 32 L12 23 L21 21 L22 13 L31 14 L35 7 L43 11 Z"
+                fill="#D94E4E" stroke="#B83B3B" stroke-width="2.5" stroke-linejoin="round"/>
+          <ellipse cx="38" cy="30" rx="14" ry="8" transform="rotate(-20 38 30)" fill="#F07878" opacity=".5"/>
+          <circle cx="37" cy="46" r="9.5" fill="#fff"/>
+          <circle cx="63" cy="46" r="9.5" fill="#fff"/>
+          <circle cx="39" cy="46" r="5" fill="#2B282A"/>
+          <circle cx="61" cy="46" r="5" fill="#2B282A"/>
+          <circle cx="41" cy="43" r="2" fill="#fff"/>
+          <circle cx="63" cy="43" r="2" fill="#fff"/>
+          <path d="M43 60 Q50 67 57 60" fill="none" stroke="#2B282A" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="26" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity=".7"/>
+          <ellipse cx="74" cy="54" rx="5" ry="3" fill="#FF9E9E" opacity=".7"/>
+        </svg>
       </button>
-      <button class="mod-tab" onclick="selectModule('p1_word')" id="tab_p1_word">
-        2. P1/P2 雙語應用題 (Word Problems)
-      </button>
-      <button class="mod-tab" onclick="selectModule('p2_adv')" id="tab_p2_adv">
-        3. P2 乘除與退位 (P2 Core)
-      </button>
-      <button class="mod-tab" onclick="selectModule('olympiad')" id="tab_olympiad">
-        4. 🏆 P1/P2 奧數挑戰 (Math Olympiad)
-      </button>
-      <button class="mod-tab" onclick="selectModule('shapes3d')" id="tab_shapes3d">
-        5. 3D 立體圖形實驗 (3D Shapes)
-      </button>
-    </nav>
-
-    <!-- Main Body Stage -->
-    <div class="stage-body">
-      <div class="redball-dialogue">
-        <div class="dialogue-left">
-          <div>
-            <span class="speaker-tag">Furry Red Ball</span>
-            <div class="dialogue-text" id="redballSpeech">
-              Bouncy-bounce! 隨時撳上方「🖨️ 列印工作紙」掣，即刻可以印出標準 A4 練習卷喺紙上做！
-            </div>
-          </div>
-        </div>
-        <div class="voice-btns">
-          <button class="tts-mini-btn" onclick="speakCurrentQuestion('zh-HK')">🔊 粵語</button>
-          <button class="tts-mini-btn" onclick="speakCurrentQuestion('en-US')">🔊 EN</button>
-        </div>
+      <div class="brand-title">
+        <h1>Furry Red Ball Math Explorer</h1>
+        <div class="brand-subtitle">動態題庫 · P1–P2 雙語互動與工作紙列印系統</div>
       </div>
-
-      <!-- Question Card -->
-      <div class="question-card">
-        <div class="q-meta-bar">
-          <span class="level-pill" id="qBadge">P1 核心基礎 · Core</span>
-          <span class="infinite-badge" id="qProgress">♾️ 動態生成 第 1 題</span>
-        </div>
-        <div class="q-text-zh" id="qTextZh"></div>
-        <div class="q-text-en" id="qTextEn"></div>
-      </div>
-
-      <!-- Switchable Helper -->
-      <div class="helper-toggle-bar">
-        <div class="helper-info">
-          <span>🛠️</span>
-          <span id="helperLabelText">輔助工具已隱藏，避免直接劇透答案 · Visual Helper is OFF</span>
-        </div>
-        <button class="switch-btn off-state" id="btnToggleHelper" onclick="toggleVisualHelper()">
-          👁️ 打開輔助工具 Show Helper
-        </button>
-      </div>
-
-      <div class="manipulative-drawer" id="manipulativeDrawer">
-        <div id="manipulativeContent"></div>
-      </div>
-
-      <div class="options-grid" id="optionsGrid"></div>
     </div>
 
-    <!-- Footer Controls -->
-    <footer>
-      <button class="nav-btn secondary" id="btnPrevQ" onclick="prevQuestion()">⬅ 上一題 Prev</button>
-      <div style="font-size: 0.85rem; font-weight: 800; color: var(--warm-grey);">
-        🖨️ 隨時支援 A4 黑白列印與解答頁 · Printable Worksheets Ready
+    <div class="header-actions">
+      <button class="pill-btn print-trigger" onclick="openPrintModal()">🖨️ 列印工作紙 Print</button>
+      <button class="pill-btn active-lang" id="btnLangMode" onclick="cycleLangMode()">🌐 雙語 Bilingual</button>
+      <button class="pill-btn" onclick="openReportModal()">📊 報告 Report</button>
+      <div class="star-badge">⭐ <span id="starScore">0</span></div>
+    </div>
+  </header>
+
+  <nav class="module-nav" aria-label="Main sections">
+    <button class="mod-tab active" id="tab_p1_num" onclick="selectModule('p1_num')" aria-pressed="true">1. P1 加減與十格陣 (Add/Sub)</button>
+    <button class="mod-tab" id="tab_p1_word" onclick="selectModule('p1_word')" aria-pressed="false">2. P1/P2 雙語應用題 (Word Problems)</button>
+    <button class="mod-tab" id="tab_p2_adv" onclick="selectModule('p2_adv')" aria-pressed="false">3. P2 乘除與退位 (P2 Core)</button>
+    <button class="mod-tab" id="tab_olympiad" onclick="selectModule('olympiad')" aria-pressed="false">4. 🏆 P1/P2 奧數挑戰 (Math Olympiad)</button>
+    <button class="mod-tab" id="tab_shapes3d" onclick="selectModule('shapes3d')" aria-pressed="false">5. 3D 立體圖形實驗 (3D Shapes)</button>
+  </nav>
+
+  <main class="stage-body">
+    <div class="redball-dialogue">
+      <div>
+        <span class="speaker-tag">Furry Red Ball</span>
+        <div class="dialogue-text" id="redballSpeech" role="status" aria-live="polite"></div>
       </div>
-      <button class="nav-btn" onclick="generateAndPushQuestion()">🎲 隨機新題目 New Question ➔</button>
-    </footer>
-  </div>
-
-  <!-- Print Configuration Modal -->
-  <div class="modal-overlay" id="printModal">
-    <div class="modal-box">
-      <h2 style="color: var(--primary-green); font-weight: 900; margin-bottom: 6px;">
-        🖨️ 列印工作紙設定 · Print Worksheet Setup
-      </h2>
-      <p style="font-size: 0.9rem; color: var(--warm-grey); font-weight: 700; margin-bottom: 16px;">
-        選擇你想列印的工作紙格式，系統會自動排版成適合學生用鉛筆作答的 A4 頁面：
-      </p>
-
-      <div class="print-mode-card selected" id="optPrintCurrent" onclick="setPrintMode('current')">
-        <div>
-          <div style="font-weight: 900; font-size: 1.05rem; color: var(--text-main);">📄 列印當前題目 (單題練習卡)</div>
-          <div style="font-size: 0.82rem; color: var(--warm-grey); font-weight: 700;">印出畫面上這 1 道題目，附帶特大「算草欄」與作答格式</div>
-        </div>
-        <span style="font-size: 1.3rem;">🔘</span>
-      </div>
-
-      <div class="print-mode-card" id="optPrint10" onclick="setPrintMode('10mixed')">
-        <div>
-          <div style="font-weight: 900; font-size: 1.05rem; color: var(--text-main);">📑 生成 10 題綜合練習卷 (A4 標準卷)</div>
-          <div style="font-size: 0.82rem; color: var(--warm-grey); font-weight: 700;">跨範疇隨機抽題（加減、文字題、退位、奧數），滿分 100 分</div>
-        </div>
-        <span style="font-size: 1.3rem;">⚪</span>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 8px; margin: 16px 0;">
-        <input type="checkbox" id="chkIncludeAnswers" checked style="width: 18px; height: 18px; cursor: pointer;">
-        <label for="chkIncludeAnswers" style="font-weight: 800; font-size: 0.95rem; cursor: pointer;">
-          附設家長/教師答案頁與解難提示 (Append Answer Key on Last Page)
-        </label>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button class="nav-btn secondary" onclick="closePrintModal()">取消 Cancel</button>
-        <button class="nav-btn" onclick="executePrintJob()">🖨️ 即刻列印 Print Now</button>
+      <div class="voice-btns">
+        <button class="tts-mini-btn" onclick="speakCurrentQuestion('zh-HK')" title="Read question in Cantonese">🔊 粵語</button>
+        <button class="tts-mini-btn" onclick="speakCurrentQuestion('en-US')" title="Read question in English">🔊 EN</button>
       </div>
     </div>
-  </div>
 
-  <!-- Parent Diagnostic Modal -->
-  <div class="modal-overlay" id="reportModal">
-    <div class="modal-box">
-      <h2 style="color: var(--primary-green); font-weight: 900; margin-bottom: 6px;">
-        📊 家長診斷報告 · Parent Diagnostic Report
-      </h2>
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">總答對題數 · Correct</div>
-          <div class="stat-val" id="statCorrect">0</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">不開工具獨立完成 · Unassisted</div>
-          <div class="stat-val" id="statUnassisted">0</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">文字題/奧數準確率 · Logic</div>
-          <div class="stat-val" id="statLogicRate">--%</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">Socratic 提示次數 · Hints</div>
-          <div class="stat-val" id="statHints">0</div>
-        </div>
-        <div class="stat-card" style="grid-column: 1 / -1;">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--warm-grey);">立體圖形準確率 · 3D Shapes</div>
-          <div class="stat-val">
-            <span id="statShapeRate">--%</span>
-            <span id="statShapeCount" style="font-size: 0.85rem; font-weight: 800; color: var(--warm-grey); margin-left: 6px;"></span>
-          </div>
-        </div>
+    <section class="p2-topic-panel" id="p2TopicPanel" hidden aria-label="P2 topic selection">
+      <div class="p2-topic-title" id="p2TopicTitle"></div>
+      <div class="p2-topic-tabs">
+        <button class="p2-topic-btn" data-p2="sub" onclick="selectP2Topic('sub')" aria-pressed="true"></button>
+        <button class="p2-topic-btn" data-p2="mul" onclick="selectP2Topic('mul')" aria-pressed="false"></button>
+        <button class="p2-topic-btn" data-p2="share" onclick="selectP2Topic('share')" aria-pressed="false"></button>
+        <button class="p2-topic-btn" data-p2="group" onclick="selectP2Topic('group')" aria-pressed="false"></button>
+        <button class="p2-topic-btn" data-p2="mixed" onclick="selectP2Topic('mixed')" aria-pressed="false"></button>
       </div>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-        <button class="nav-btn secondary" onclick="resetStats()">重設紀錄 Reset</button>
-        <button class="nav-btn" onclick="closeReportModal()">關閉 Close</button>
+      <p class="p2-topic-note" id="p2TopicNote"></p>
+    </section>
+
+    <section class="question-card" aria-label="Question">
+      <div class="q-meta-bar">
+        <span class="level-pill" id="qBadge"></span>
+        <span class="infinite-badge" id="qProgress"></span>
       </div>
+      <div class="q-text-zh" id="qTextZh"></div>
+      <div class="q-text-en" id="qTextEn"></div>
+    </section>
+
+    <div class="helper-toggle-bar">
+      <div class="helper-info" id="helperLabelText"></div>
+      <button class="switch-btn off-state" id="btnToggleHelper"
+              onclick="toggleVisualHelper()" aria-expanded="false"
+              aria-controls="manipulativeDrawer"></button>
+    </div>
+
+    <section class="manipulative-drawer" id="manipulativeDrawer" hidden aria-label="Visual helper">
+      <div id="manipulativeContent"></div>
+    </section>
+
+    <div class="options-grid" id="optionsGrid" aria-label="Answer choices"></div>
+  </main>
+
+  <footer>
+    <button class="nav-btn secondary" id="btnPrevQ" onclick="prevQuestion()">⬅ 上一題 Prev</button>
+    <div class="footer-note">🖨️ A4 工作紙與答案頁 · Printable Worksheets</div>
+    <button class="nav-btn" onclick="generateAndPushQuestion()">🎲 隨機新題目 New Question ➔</button>
+  </footer>
+</div>
+
+<!-- Print setup -->
+<div class="modal-overlay" id="printModal" role="dialog" aria-modal="true" aria-labelledby="printTitle">
+  <div class="modal-box">
+    <h2 id="printTitle">🖨️ 列印工作紙 · Print Worksheet</h2>
+    <p class="modal-description">列印不會改動畫面上的題目、工具進度或星星。Printing does not change your current question or score.</p>
+
+    <label class="print-mode-card">
+      <input type="radio" name="printMode" value="current" checked>
+      <span>
+        <strong>📄 當前題目 · Current question</strong>
+        <small>單題練習卡，附算草欄。One question with working space.</small>
+      </span>
+    </label>
+
+    <label class="print-mode-card">
+      <input type="radio" name="printMode" value="10mixed">
+      <span>
+        <strong>📑 10 題綜合卷 · 10 mixed questions</strong>
+        <small>包括加減、應用題、四種 P2 題型、奧數與立體圖形。Includes all four P2 topics.</small>
+      </span>
+    </label>
+
+    <label class="print-mode-card">
+      <input type="radio" name="printMode" value="10topic">
+      <span>
+        <strong>📚 當前範疇 10 題 · 10 questions from this section</strong>
+        <small>P2 會跟隨所選題型，例如「除法分組」。For P2, uses the selected topic.</small>
+      </span>
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" id="chkIncludeAnswers" checked>
+      <span>附教師／家長答案頁與解題步驟<br>Append answer key and worked explanations</span>
+    </label>
+
+    <div class="modal-actions">
+      <button class="nav-btn secondary" onclick="closePrintModal()">取消 Cancel</button>
+      <button class="nav-btn" onclick="executePrintJob()">🖨️ 列印 Print</button>
     </div>
   </div>
+</div>
 
-  <!-- Dedicated Print Container -->
-  <div id="printWorksheetContainer"></div>
+<!-- Report -->
+<div class="modal-overlay" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="modal-box">
+    <h2 id="reportTitle">📊 家長報告 · Parent Report</h2>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-title">答對题數 · Solved questions</div>
+        <div class="stat-val" id="statCorrect">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">無工具／提示完成 · Unassisted</div>
+        <div class="stat-val" id="statUnassisted">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">推理選答準確率 · Reasoning attempts</div>
+        <div class="stat-val" id="statLogicRate">--%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">答錯後提示次數 · Wrong-answer hints</div>
+        <div class="stat-val" id="statHints">0</div>
+      </div>
+      <div class="stat-card" style="grid-column:1/-1">
+        <div class="stat-title">立體圖形選答準確率 · Shape attempts</div>
+        <div class="stat-val" id="statShapeRate">--%</div>
+        <div class="helper-note" id="statShapeCount"></div>
+      </div>
+    </div>
 
-  <script>
-    /* ============================================================================
-       PROCEDURAL MATH ENGINE
-       ============================================================================ */
-    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    <p class="modal-description">
+      準確率按每次選答計算，不是首次作答準確率。已完成題目不會因返回、切換語言或重開工具而再次加星。
+      <br>
+      Accuracy is per answer attempt, not first-attempt accuracy. Revisiting a solved question does not earn another star.
+    </p>
+    <p class="helper-note">
+      星星與統計會盡可能儲存在此瀏覽器。題目歷史與工具進度只保留至重新載入。
+      <br>Scores are saved locally when available; question history lasts until reload.
+    </p>
+    <p id="storageNotice" hidden>此瀏覽器未能儲存紀錄，今次成績仍可繼續使用。Local saving is unavailable; session scores still work.</p>
 
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
+    <div class="modal-actions">
+      <button class="nav-btn secondary" onclick="resetStats()">重設統計 Reset</button>
+      <button class="nav-btn" onclick="closeReportModal()">關閉 Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="printWorksheetContainer"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   Utilities
+   ========================================================== */
+const $ = id => document.getElementById(id);
+const randInt = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+const pickOne = list => list[randInt(0,list.length-1)];
+
+function shuffleArray(list){
+  const copy=[...list];
+  for(let i=copy.length-1;i>0;i--){
+    const j=randInt(0,i);
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function esc(value){
+  return String(value).replace(/[&<>"']/g,ch=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+
+function textFor(zh,en){
+  if(langMode==="zh") return zh;
+  if(langMode==="en") return en;
+  return zh+"\n"+en;
+}
+
+function buildOptions(correct,traps,unitZh="",unitEn=""){
+  const values=new Set([correct]);
+  for(const value of traps){
+    if(values.size>=4) break;
+    if(Number.isFinite(value)&&value>=0) values.add(value);
+  }
+  for(let offset=1;values.size<4;offset++){
+    values.add(correct+offset);
+  }
+  const format=value=>{
+    if(unitZh&&unitEn) return `${value} ${unitZh} (${unitEn})`;
+    if(unitZh) return `${value} ${unitZh}`;
+    return String(value);
+  };
+  return {
+    answerValue:correct,
+    ans:format(correct),
+    options:shuffleArray([...values].map(format))
+  };
+}
+
+function numericQuestion(base,value,traps,unitZh="",unitEn=""){
+  return {...base,...buildOptions(value,traps,unitZh,unitEn)};
+}
+
+/* ==========================================================
+   Shape knowledge
+   "Edges" here explicitly means straight edges.
+   ========================================================== */
+const SHAPE_LIB={
+  cylinder:{zh:"圓柱體",en:"Cylinder",itemZh:"湯罐",itemEn:"soup can",flat:2,curved:1,vertices:0,edges:0},
+  cube:{zh:"正方體",en:"Cube",itemZh:"骰子",itemEn:"die",flat:6,curved:0,vertices:8,edges:12},
+  cuboid:{zh:"長方體",en:"Cuboid",itemZh:"長方形紙巾盒",itemEn:"rectangular tissue box",flat:6,curved:0,vertices:8,edges:12},
+  cone:{zh:"圓錐體",en:"Cone",itemZh:"雪糕筒",itemEn:"ice-cream cone",flat:1,curved:1,vertices:1,edges:0},
+  sphere:{zh:"球體",en:"Sphere",itemZh:"足球",itemEn:"football",flat:0,curved:1,vertices:0,edges:0},
+  pyramid:{zh:"四角錐體",en:"Square pyramid",itemZh:"方底金字塔",itemEn:"square-based pyramid",flat:5,curved:0,vertices:5,edges:8}
+};
+const SHAPE_KEYS=Object.keys(SHAPE_LIB);
+const shapeName=key=>`${SHAPE_LIB[key].zh}（${SHAPE_LIB[key].en}）`;
+
+const CONCEPT_ASKS=[
+  {
+    key:"sphere",
+    zh:"以下哪個立體圖形可以向不同方向滾動，而且沒有平面？",
+    en:"Which solid can roll in different directions and has no flat face?",
+    clueZh:"比較表面：哪個圖形整個表面都是彎曲的？",
+    clueEn:"Compare the surfaces. Which solid is curved all over?",
+    solutionZh:"球體沒有平面，可以向不同方向滾動。",
+    solutionEn:"A sphere has no flat face and can roll in different directions."
+  },
+  {
+    key:"cone",
+    zh:"以下哪個立體圖形只有 1 個尖頂（頂點）？",
+    en:"Which solid has exactly one pointed vertex?",
+    clueZh:"留意每個圖形的尖角，不要把圓形邊界當成頂點。",
+    clueEn:"Look for pointed corners. A circular boundary is not a vertex.",
+    solutionZh:"圓錐體有 1 個頂點。",
+    solutionEn:"A cone has one vertex."
+  },
+  {
+    key:"sphere",
+    zh:"以下哪個立體圖形沒有平面、沒有直棱，也沒有頂點？",
+    en:"Which solid has no flat face, no straight edge and no vertex?",
+    clueZh:"找一個沒有角、沒有平坦表面的圖形。",
+    clueEn:"Look for a solid with no corners and no flat surfaces.",
+    solutionZh:"球體有 0 個平面、0 條直棱、0 個頂點。",
+    solutionEn:"A sphere has zero flat faces, straight edges and vertices."
+  },
+  {
+    key:"cube",
+    zh:"以下哪個立體圖形有 6 個面，而且全部都是一樣大的正方形？",
+    en:"Which solid has six faces that are all identical squares?",
+    clueZh:"比較各面的形狀和大小，而不只是面數。",
+    clueEn:"Compare the shape and size of the faces, not just their number.",
+    solutionZh:"正方體的 6 個面都是一樣大的正方形。",
+    solutionEn:"A cube has six identical square faces."
+  },
+  {
+    key:"cylinder",
+    zh:"以下哪個立體圖形的頂和底都是圓形，而且側面是曲面？",
+    en:"Which solid has a circular top and bottom and a curved side?",
+    clueZh:"找兩個相同的圓形平面，再觀察中間的側面。",
+    clueEn:"Look for two matching circular flat faces and a curved side.",
+    solutionZh:"圓柱體有 2 個圓形平面和 1 個曲面。",
+    solutionEn:"A cylinder has two circular flat faces and one curved surface."
+  },
+  {
+    key:"pyramid",
+    zh:"以下哪個立體圖形有 1 個正方形底和 4 個三角形側面？",
+    en:"Which solid has one square base and four triangular sides?",
+    clueZh:"留意底面的形狀，並逐個數三角形側面。",
+    clueEn:"Inspect the base, then count the triangular sides.",
+    solutionZh:"四角錐體有 1 個正方形底及 4 個三角形側面，共 5 個平面。",
+    solutionEn:"A square pyramid has one square base and four triangular sides: five flat faces."
+  }
+];
+
+/* ==========================================================
+   Question generators
+   clue = non-answer hint
+   solution = worked explanation for answer key
+   ========================================================== */
+const ProceduralGenerator={
+  p1_num(){
+    const type=pickOne(["make10","break10","missing"]);
+    if(type==="make10"){
+      const a=randInt(6,9), b=randInt(11-a,9), total=a+b;
+      return numericQuestion({
+        level:"P1 湊十進位加法 · Make-10 Addition",
+        zh:`計算：${a} + ${b} = ?`,
+        en:`Calculate: ${a} + ${b} = ?`,
+        helperType:"tenframe",kind:type,a,b,
+        clueZh:`先用綠色擺 ${a} 粒，再用紅色擺 ${b} 粒。第一個十格陣還差幾粒才滿？`,
+        clueEn:`Place ${a} green dots and ${b} red dots. How many more dots fill the first ten-frame?`,
+        solutionZh:`${a} 還差 ${10-a} 湊成 10。把 ${b} 拆成 ${10-a} 和 ${b-(10-a)}：10 + ${b-(10-a)} = ${total}。`,
+        solutionEn:`Split ${b} into ${10-a} and ${b-(10-a)}. Make 10, then add the remainder: ${total}.`
+      },total,[total-1,total+1,total-2]);
     }
+    if(type==="break10"){
+      const a=randInt(11,18), b=randInt(a-9,9), answer=a-b;
+      return numericQuestion({
+        level:"P1 破十減法 · Break-10 Subtraction",
+        zh:`計算：${a} − ${b} = ?`,
+        en:`Calculate: ${a} − ${b} = ?`,
+        helperType:"tenframe",kind:type,a,b,
+        clueZh:`先擺 ${a} 粒。把其中 ${b} 粒改成紅色，表示拎走，再數剩下的綠色。`,
+        clueEn:`Place ${a} dots. Turn ${b} of them red to mark removal, then count the green dots left.`,
+        solutionZh:`${a} = 10 + ${a-10}。先算 10 − ${b} = ${10-b}，再加 ${a-10}，答案是 ${answer}。`,
+        solutionEn:`Split ${a} into 10 and ${a-10}. Calculate (10 − ${b}) + ${a-10} = ${answer}.`
+      },answer,[answer+1,answer-1,10+b-(a-10)]);
+    }
+    const a=randInt(5,9), missing=randInt(4,9), total=a+missing;
+    return numericQuestion({
+      level:"P1 未知加數 · Missing Addend",
+      zh:`填空：${a} + [ ? ] = ${total}`,
+      en:`Fill in the blank: ${a} + [ ? ] = ${total}`,
+      helperType:"tenframe",kind:type,a,total,
+      clueZh:`先擺 ${a} 粒綠色，再加紅色至共有 ${total} 粒。數一數加了幾粒紅色？`,
+      clueEn:`Place ${a} green dots, then add red dots until there are ${total} dots. Count the red dots added.`,
+      solutionZh:`未知加數 = ${total} − ${a} = ${missing}。`,
+      solutionEn:`The missing addend is ${total} − ${a} = ${missing}.`
+    },missing,[total+a,missing+1,missing-1]);
+  },
 
-    function buildOptions(correctVal, trapVals, unitZh = "", unitEn = "") {
-      const formatOpt = (v) => {
-        if (unitZh && unitEn) return `${v} ${unitZh} (${v} ${unitEn})`;
-        if (unitZh) return `${v} ${unitZh}`;
-        return `${v}`;
-      };
-      const set = new Set([correctVal]);
-      for (const t of trapVals) {
-        if (t > 0 && !set.has(t)) set.add(t);
-        if (set.size === 4) break;
-      }
-      let offset = 1;
-      while (set.size < 4) {
-        const cand = correctVal + (offset % 2 === 0 ? offset : -offset);
-        if (cand > 0 && !set.has(cand)) set.add(cand);
-        offset++;
-      }
+  p1_word(){
+    const type=pickOne(["comparison","bus","money"]);
+    if(type==="comparison"){
+      const a=randInt(7,14), diff=randInt(4,8), answer=a+diff;
+      return numericQuestion({
+        level:"P1 比較型應用題 · Comparison",
+        zh:`小華有 ${a} 粒士多啤梨，小華比小明少 ${diff} 粒。小明有士多啤梨多少粒？`,
+        en:`Wah has ${a} strawberries. Wah has ${diff} fewer than Ming. How many strawberries does Ming have?`,
+        helperType:"barmodel",
+        bars:[
+          {zh:"小華",en:"Wah",width:a/answer*90,text:String(a),color:"#529C47"},
+          {zh:"小明",en:"Ming",width:90,text:`${a} + ${diff} = ?`,color:"#529C47"}
+        ],
+        clueZh:"先想清楚誰比較多。小華比較少，所以小明的條形應較長。",
+        clueEn:"Decide who has more. Wah has fewer, so Ming's bar should be longer.",
+        solutionZh:`小明比小華多 ${diff} 粒：${a} + ${diff} = ${answer} 粒。`,
+        solutionEn:`Ming has ${diff} more: ${a} + ${diff} = ${answer} strawberries.`
+      },answer,[Math.max(1,a-diff),answer+1,answer-1],"粒","strawberries");
+    }
+    if(type==="bus"){
+      const start=randInt(20,32), off=randInt(6,10), on=randInt(5,12);
+      const answer=start-off+on;
+      return numericQuestion({
+        level:"P2 兩步應用題 · Two-Step Word Problem",
+        zh:`港鐵車廂原本有 ${start} 人，到站後有 ${off} 人落車，再有 ${on} 人上車。現在有乘客多少人？`,
+        en:`A train had ${start} passengers. ${off} got off, then ${on} got on. How many passengers are there now?`,
+        helperType:"barmodel",
+        bars:[
+          {zh:"先落車",en:"Get off",width:75,text:`${start} − ${off}`,color:"#736D71"},
+          {zh:"再上車",en:"Get on",width:90,text:`(${start} − ${off}) + ${on} = ?`,color:"#529C47"}
+        ],
+        clueZh:"落車令人数減少，上車令人数增加。分兩步做，別漏了第二步。",
+        clueEn:"Getting off decreases the number; getting on increases it. Use two steps.",
+        solutionZh:`${start} − ${off} = ${start-off}；${start-off} + ${on} = ${answer} 人。`,
+        solutionEn:`${start} − ${off} = ${start-off}; ${start-off} + ${on} = ${answer} passengers.`
+      },answer,[start-off,start+off+on,answer-2],"人","people");
+    }
+    const a=randInt(12,22), b=randInt(11,18), total=a+b, answer=50-total;
+    return numericQuestion({
+      level:"P2 香港貨幣與找續 · HK Money & Change",
+      zh:`果汁售 ${a} 元，餅乾售 ${b} 元。付一張 50 元紙幣，應找回多少元？`,
+      en:`Juice costs $${a} and biscuits cost $${b}. Pay with $50. How much change should you receive?`,
+      helperType:"barmodel",
+      bars:[
+        {zh:"付款",en:"Paid",width:90,text:"$50",color:"#736D71"},
+        {zh:"總售價",en:"Cost",width:total/50*90,text:`$${a} + $${b}`,color:"#529C47"}
+      ],
+      clueZh:"先求兩件物品的總售價，再用付款減總售價。",
+      clueEn:"Find the total cost first, then subtract it from the payment.",
+      solutionZh:`總售價 ${a} + ${b} = ${total} 元；找續 50 − ${total} = ${answer} 元。`,
+      solutionEn:`Total cost: $${a} + $${b} = $${total}. Change: $50 − $${total} = $${answer}.`
+    },answer,[answer+10,total,answer-2],"元","dollars");
+  },
+
+  p2_adv(topic="mixed",sample=false){
+    const mode=topic==="mixed"?pickOne(["sub","mul","share","group"]):topic;
+    if(mode==="sub"){
+      const at=sample?5:randInt(3,9);
+      const ao=sample?3:randInt(0,8);
+      const bt=sample?2:randInt(1,at-1);
+      const bo=sample?9:randInt(ao+1,9);
+      const a=at*10+ao, b=bt*10+bo, answer=a-b;
+      const swap=(at-bt)*10+(bo-ao);
+      return numericQuestion({
+        level:"P2 兩位數退位減法 · 2-Digit Borrowing",
+        zh:`計算：${a} − ${b} = ?`,
+        en:`Calculate: ${a} − ${b} = ?`,
+        helperType:"p2",mode,at,ao,bt,bo,a,b,swap,
+        clueZh:`${ao} 個一不夠拎走 ${bo} 個一，先把一個十換成十個一，再減個位和十位。`,
+        clueEn:`There are not enough ones to remove ${bo}. Exchange one ten for ten ones, then subtract ones and tens.`,
+        solutionZh:`${a} = ${(at-1)*10} + ${ao+10}。個位：${ao+10} − ${bo} = ${ao+10-bo}；十位：${at-1} − ${bt} = ${at-1-bt}。答案 ${answer}。`,
+        solutionEn:`Exchange a ten: ${a} = ${(at-1)*10} + ${ao+10}. Ones: ${ao+10} − ${bo} = ${ao+10-bo}. Tens: ${at-1} − ${bt} = ${at-1-bt}. Answer: ${answer}.`
+      },answer,[swap,answer+10,answer-1,answer+1]);
+    }
+    if(mode==="mul"){
+      const per=randInt(2,5), groups=randInt(2,7), answer=per*groups;
+      return numericQuestion({
+        level:"P2 乘法分組 · Multiplication Groups",
+        zh:`每隻蒸籠有 ${per} 件點心，${groups} 隻蒸籠共有多少件？（${per} × ${groups} = ?）`,
+        en:`Each basket has ${per} dim sum pieces. How many pieces are in ${groups} baskets? (${per} × ${groups} = ?)`,
+        helperType:"p2",mode,per,groups,
+        clueZh:`每加入一隻蒸籠，就多 ${per} 件。逐組跳數，留意共有 ${groups} 組。`,
+        clueEn:`Each added basket adds ${per} pieces. Skip count through ${groups} equal groups.`,
+        solutionZh:`${groups} 組，每組 ${per} 件：${Array(groups).fill(per).join(" + ")} = ${answer}。即 ${per} × ${groups} = ${answer} 件。`,
+        solutionEn:`${groups} groups of ${per}: ${Array(groups).fill(per).join(" + ")} = ${answer}.`
+      },answer,[per+groups,answer+per,answer-per],"件","pieces");
+    }
+    const d=randInt(2,5), k=randInt(2,5), total=d*k;
+    const sharing=mode==="share";
+    return numericQuestion({
+      level:sharing?"P2 除法平分 · Division: Sharing":"P2 除法分組 · Division: Grouping",
+      zh:sharing
+        ?`${total} 塊餅平均分到 ${d} 隻碟，每碟有多少塊？（${total} ÷ ${d} = ?）`
+        :`${total} 塊餅，每組放 ${d} 塊，可以分成多少組？（${total} ÷ ${d} = ?）`,
+      en:sharing
+        ?`Share ${total} cookies equally onto ${d} plates. How many cookies on each plate? (${total} ÷ ${d} = ?)`
+        :`Put ${total} cookies into groups of ${d}. How many groups can you make? (${total} ÷ ${d} = ?)`,
+      helperType:"p2",mode,d,k,total,
+      clueZh:sharing
+        ?"每輪每碟放一塊，分完後只數一隻碟的餅。"
+        :`每次拿 ${d} 塊放成一組，分完後數組數。`,
+      clueEn:sharing
+        ?"Give one cookie to each plate per round. When finished, count cookies on ONE plate."
+        :`Make one group of ${d} at a time. When finished, count GROUPS.`,
+      solutionZh:sharing
+        ?`${total} ÷ ${d} = ${k}，每碟有 ${k} 塊。檢查：${d} 碟 × ${k} 塊 = ${total} 塊。`
+        :`${total} ÷ ${d} = ${k}，可分成 ${k} 組。檢查：${k} 組 × ${d} 塊 = ${total} 塊。`,
+      solutionEn:sharing
+        ?`${total} ÷ ${d} = ${k} cookies per plate. Check: ${d} plates × ${k} cookies = ${total}.`
+        :`${total} ÷ ${d} = ${k} groups. Check: ${k} groups × ${d} cookies = ${total}.`
+    },k,[d,k+1,k-1,total-d,k+2],sharing?"塊":"組",sharing?"cookies":"groups");
+  },
+
+  olympiad(){
+    const type=pickOne(["queue","sawing","age"]);
+    if(type==="queue"){
+      const front=randInt(4,8), back=randInt(4,7), answer=front+back-1;
+      return numericQuestion({
+        level:"🏆 奧數：排隊重疊 · Queue Logic",isOlympiad:true,
+        zh:`小朋友排隊買雪糕。Furry Red Ball 由前數排第 ${front}，由後數排第 ${back}。這隊共有多少人？`,
+        en:`Furry Red Ball is number ${front} from the front and number ${back} from the back. How many people are in the queue?`,
+        helperType:"barmodel",
+        bars:[{zh:"排隊",en:"Queue",width:95,text:`${front-1} + 🔴 + ${back-1}`,color:"#D94E4E"}],
+        clueZh:"由前數和由後數都包括紅波波。想想有誰被數了兩次？",
+        clueEn:"Both counts include Red Ball. Who has been counted twice?",
+        solutionZh:`${front} + ${back} − 1 = ${answer} 人，減去重複數的一人。`,
+        solutionEn:`${front} + ${back} − 1 = ${answer}; subtract the person counted twice.`
+      },answer,[front+back,answer-1,answer+2],"人","people");
+    }
+    if(type==="sawing"){
+      const pieces=randInt(3,6), minutes=randInt(2,4), cuts=pieces-1, answer=cuts*minutes;
+      return numericQuestion({
+        level:"🏆 奧數：鋸木間隔 · Interval Logic",isOlympiad:true,
+        zh:`一條木頭逐刀鋸成 ${pieces} 段，不疊起來鋸。每鋸一次要 ${minutes} 分鐘，一共要多少分鐘？`,
+        en:`Saw one log into ${pieces} pieces, one cut at a time without stacking. Each cut takes ${minutes} minutes. How long in total?`,
+        helperType:"barmodel",
+        bars:[{zh:"木段",en:"Pieces",width:95,text:Array(pieces).fill("▰").join(" | "),color:"#529C47"}],
+        clueZh:"先數木段之間的分界線。刀數等於段數嗎？",
+        clueEn:"Count the boundaries between pieces. Is the number of cuts the same as the number of pieces?",
+        solutionZh:`刀數 = ${pieces} − 1 = ${cuts}。時間 = ${cuts} × ${minutes} = ${answer} 分鐘。`,
+        solutionEn:`Cuts: ${pieces} − 1 = ${cuts}. Time: ${cuts} × ${minutes} = ${answer} minutes.`
+      },answer,[pieces*minutes,answer-minutes,answer+1],"分鐘","minutes");
+    }
+    const gap=randInt(3,6), later=randInt(4,9);
+    return numericQuestion({
+      level:"🏆 奧數：年齡差不變 · Age Difference",isOlympiad:true,
+      zh:`今年哥哥比妹妹大 ${gap} 歲。${later} 年後，哥哥比妹妹大多少歲？`,
+      en:`Brother is ${gap} years older than sister. In ${later} years, how many years older will he be?`,
+      helperType:"barmodel",
+      bars:[
+        {zh:"哥哥",en:"Brother",width:90,text:`+ ${later}`,color:"#529C47"},
+        {zh:"妹妹",en:"Sister",width:65,text:`+ ${later}`,color:"#736D71"}
+      ],
+      clueZh:"兩人都增加一樣多的歲數。想想兩條線一起延長，差距會怎樣？",
+      clueEn:"Both ages increase by the same amount. What happens to their difference?",
+      solutionZh:`兩人都長大 ${later} 歲，年齡差不變，仍相差 ${gap} 歲。`,
+      solutionEn:`Both get ${later} years older, so the age difference stays ${gap} years.`
+    },gap,[gap+later,later,gap+1],"歲","years");
+  },
+
+  shapes3d(){
+    if(Math.random()<.45){
+      const c=pickOne(CONCEPT_ASKS);
+      const keys=shuffleArray([c.key,...shuffleArray(SHAPE_KEYS.filter(k=>k!==c.key)).slice(0,3)]);
       return {
-        ans: formatOpt(correctVal),
-        options: shuffleArray(Array.from(set).map(formatOpt))
+        level:"3D 圖形概念 · Shape Properties",
+        zh:c.zh,en:c.en,
+        ans:shapeName(c.key),options:keys.map(shapeName),
+        helperType:"threejs-gallery",galleryKeys:keys,printOptions:true,
+        clueZh:c.clueZh,clueEn:c.clueEn,
+        solutionZh:c.solutionZh,solutionEn:c.solutionEn
       };
     }
-
-    /* ============================================================================
-       3D SHAPE KNOWLEDGE BASE (HK primary curriculum: 面 / 曲面 / 頂點 / 棱)
-       ============================================================================ */
-    const SHAPE_LIB = {
-      cylinder: { zh: "圓柱體", en: "Cylinder", itemZh: "湯罐", itemEn: "soup can",
-                  flat: 2, curved: 1, vertices: 0, edges: 0 },
-      cube:     { zh: "正方體", en: "Cube", itemZh: "骰子", itemEn: "dice",
-                  flat: 6, curved: 0, vertices: 8, edges: 12 },
-      cuboid:   { zh: "長方體", en: "Cuboid", itemZh: "紙巾盒", itemEn: "tissue box",
-                  flat: 6, curved: 0, vertices: 8, edges: 12 },
-      cone:     { zh: "圓錐體", en: "Cone", itemZh: "雪糕筒", itemEn: "ice-cream cone",
-                  flat: 1, curved: 1, vertices: 1, edges: 0 },
-      sphere:   { zh: "球體", en: "Sphere", itemZh: "足球", itemEn: "football",
-                  flat: 0, curved: 1, vertices: 0, edges: 0 },
-      pyramid:  { zh: "四角錐體", en: "Square Pyramid", itemZh: "金字塔", itemEn: "pyramid",
-                  flat: 5, curved: 0, vertices: 5, edges: 8 }
+    const key=pickOne(SHAPE_KEYS), s=SHAPE_LIB[key];
+    const type=pickOne(["flat","curved","vertices","edges","everyday"]);
+    const base={
+      helperType:"threejs",shapeKey:key,printOptions:true,
+      solutionZh:`${s.zh}有 ${s.flat} 個平面、${s.curved} 個曲面、${s.vertices} 個頂點和 ${s.edges} 條直棱。`,
+      solutionEn:`A ${s.en.toLowerCase()} has ${s.flat} flat faces, ${s.curved} curved surfaces, ${s.vertices} vertices and ${s.edges} straight edges.`
     };
-    const SHAPE_KEYS = Object.keys(SHAPE_LIB);
+    if(type==="everyday"){
+      const item=k=>`${SHAPE_LIB[k].itemZh}（${SHAPE_LIB[k].itemEn}）`;
+      return {
+        ...base,level:"3D 圖形辨認 · Everyday Shapes",
+        zh:`哪件日常物件的形狀最接近「${s.zh}」？`,
+        en:`Which everyday object is closest in shape to a ${s.en.toLowerCase()}?`,
+        ans:item(key),
+        options:shuffleArray([item(key),...shuffleArray(SHAPE_KEYS.filter(k=>k!==key)).slice(0,3).map(item)]),
+        clueZh:"比較物件的整體形狀，留意平面、曲面及尖角。",
+        clueEn:"Compare overall shapes, looking at flat surfaces, curved surfaces and corners.",
+        solutionZh:`${s.zh}的例子是${s.itemZh}。${base.solutionZh}`,
+        solutionEn:`A ${s.itemEn} is an example. ${base.solutionEn}`
+      };
+    }
+    const labels={
+      flat:["平面","flat faces","轉動圖形，逐個數平坦的面。","Rotate the solid and count each flat face once."],
+      curved:["曲面","curved surfaces","留意彎曲而不是平坦的表面。","Look for curved rather than flat surfaces."],
+      vertices:["頂點","vertices","數尖角，注意背面或底部可能還有頂點。","Count corners, including those at the back or bottom."],
+      edges:["直棱","straight edges","只數平面相交形成的直線邊，不數圓形邊界。","Count straight edges where flat faces meet, not circular boundaries."]
+    };
+    const label=labels[type];
+    return numericQuestion({
+      ...base,level:`3D 立體圖形：${label[0]} · ${label[1]}`,
+      zh:`「${s.zh}」一共有多少${type==="edges"?"條":"個"}${label[0]}？`,
+      en:`How many ${label[1]} does a ${s.en.toLowerCase()} have?`,
+      clueZh:label[2],clueEn:label[3]
+    },s[type],[s[type]+1,s[type]-1,s[type]+2,s[type]-2,0]);
+  }
+};
 
-    /* Unambiguous property questions — each answer is the ONLY shape in SHAPE_LIB that fits. */
-    const CONCEPT_ASKS = [
-      {
-        ansShape: 'sphere',
-        zh: '把以下哪一個立體圖形放在斜板上，它可以向前後左右任何方向滾動？',
-        en: 'Which of these shapes rolls in every direction when put on a slope?',
-        hintZh: '球體整個表面都是曲面，每一點都可以接觸地面，所以任何方向都滾得動。圓柱體只可以向一個方向滾，其他圖形有平面，滾不動。',
-        hintEn: 'A sphere is all curved surface, so it rolls every way. A cylinder rolls only one way; shapes with flat faces do not roll.'
-      },
-      {
-        ansShape: 'cone',
-        zh: '以下哪一個立體圖形只有 1 個尖頂（頂點）？',
-        en: 'Which shape has exactly one pointed vertex?',
-        hintZh: '圓錐體只有 1 個頂點（尖頂）。球體和圓柱體有 0 個，正方體和長方體有 8 個，四角錐體有 5 個。',
-        hintEn: 'A cone has exactly 1 vertex. Sphere and cylinder have 0, cube and cuboid have 8, a square pyramid has 5.'
-      },
-      {
-        ansShape: 'sphere',
-        zh: '以下哪一個立體圖形完全沒有平面、沒有棱、也沒有頂點？',
-        en: 'Which shape has no flat face, no edge and no vertex at all?',
-        hintZh: '球體全部都是曲面：0 個平面、0 條棱、0 個頂點。其他圖形最少都有 1 個平面。',
-        hintEn: 'A sphere is entirely curved: 0 flat faces, 0 edges, 0 vertices. Every other shape here has at least one flat face.'
-      },
-      {
-        ansShape: 'cube',
-        zh: '以下哪一個立體圖形有 6 個平面，而且 6 個面都是完全一樣的正方形？',
-        en: 'Which shape has 6 flat faces that are all identical squares?',
-        hintZh: '正方體 6 個面都是正方形，而且一樣大。長方體雖然都有 6 個平面，但面是長方形，唔係正方形。',
-        hintEn: 'A cube has 6 identical square faces. A cuboid also has 6 flat faces, but they are rectangles, not squares.'
-      },
-      {
-        ansShape: 'cylinder',
-        zh: '以下哪一個立體圖形的頂和底都是圓形，側面可以滾動，但直立時又可以穩定放在枱面？',
-        en: 'Which shape has a circular top and bottom, rolls on its side, and still stands steady upright?',
-        hintZh: '圓柱體有 2 個圓形平面（頂和底）加 1 個曲面。所以側放可以滾一個方向，直立時又穩。',
-        hintEn: 'A cylinder has 2 circular flat faces plus 1 curved surface — it rolls one way on its side and stands steady upright.'
-      },
-      {
-        ansShape: 'pyramid',
-        zh: '以下哪一個立體圖形有 5 個平面：1 個四邊形底加 4 個三角形？',
-        en: 'Which shape has 5 flat faces: one quadrilateral base plus 4 triangles?',
-        hintZh: '四角錐體：1 個四邊形底 + 4 個三角形側面 = 5 個平面、5 個頂點、8 條棱。圓錐體只有 2 個面。',
-        hintEn: 'A square pyramid: 1 quadrilateral base + 4 triangular sides = 5 flat faces, 5 vertices, 8 edges. A cone has only 2 faces.'
+/* ==========================================================
+   App and per-question state
+   ========================================================== */
+let currentMod="p1_num";
+let p2Mode="sub";
+let langMode="bilingual";
+
+const questionHistory={p1_num:[],p1_word:[],p2_adv:[],olympiad:[],shapes3d:[]};
+const historyCursor={p1_num:-1,p1_word:-1,p2_adv:-1,olympiad:-1,shapes3d:-1};
+
+const STATS_KEY="redball_stats_v5";
+const STATS_DEFAULT={
+  stars:0,correct:0,unassisted:0,
+  logicTotal:0,logicCorrect:0,hints:0,
+  shapeTotal:0,shapeCorrect:0
+};
+
+let storageAvailable=true;
+function loadStats(){
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(STATS_KEY)||"{}")||{}}
+  catch(error){storageAvailable=false}
+  const clean={...STATS_DEFAULT};
+  Object.keys(clean).forEach(key=>{
+    if(Number.isFinite(saved[key])&&saved[key]>=0) clean[key]=saved[key];
+  });
+  return clean;
+}
+let stats=loadStats();
+
+function saveStats(){
+  try{
+    localStorage.setItem(STATS_KEY,JSON.stringify(stats));
+    storageAvailable=true;
+  }catch(error){storageAvailable=false}
+  $("starScore").textContent=stats.stars;
+  $("storageNotice").hidden=storageAvailable;
+}
+
+function getCurrentQuestion(){
+  return questionHistory[currentMod][historyCursor[currentMod]];
+}
+
+function stateOf(q){
+  if(!q.state){
+    q.state={
+      solved:false,wrong:[],helperOpen:false,usedHelper:false,
+      hadHint:false,step:0,tfDots:Array(20).fill(0),
+      feedbackZh:"",feedbackEn:""
+    };
+  }
+  return q.state;
+}
+
+function makeQuestion(mod,topic){
+  return mod==="p2_adv"
+    ?ProceduralGenerator.p2_adv(topic||"mixed")
+    :ProceduralGenerator[mod]();
+}
+
+function generateAndPushQuestion(){
+  let q;
+  if(currentMod==="p2_adv"){
+    const sample=questionHistory.p2_adv.length===0&&p2Mode==="sub";
+    q=ProceduralGenerator.p2_adv(p2Mode,sample);
+    q.practiceTopic=p2Mode;
+  }else{
+    q=ProceduralGenerator[currentMod]();
+  }
+  questionHistory[currentMod].push(q);
+  historyCursor[currentMod]=questionHistory[currentMod].length-1;
+  renderQuestion();
+}
+
+function prevQuestion(){
+  if(historyCursor[currentMod]<=0) return;
+  historyCursor[currentMod]--;
+  const q=getCurrentQuestion();
+  if(currentMod==="p2_adv") p2Mode=q.practiceTopic||q.mode;
+  renderQuestion();
+}
+
+function selectModule(mod){
+  currentMod=mod;
+  if(!questionHistory[mod].length) generateAndPushQuestion();
+  else renderQuestion();
+}
+
+function selectP2Topic(mode){
+  p2Mode=mode;
+  currentMod="p2_adv";
+  generateAndPushQuestion();
+}
+
+function cycleLangMode(){
+  const modes=["bilingual","zh","en"];
+  langMode=modes[(modes.indexOf(langMode)+1)%modes.length];
+  $("btnLangMode").textContent={
+    bilingual:"🌐 雙語 Bilingual",zh:"🇭🇰 繁體中文",en:"🌐 English"
+  }[langMode];
+  renderQuestion();
+}
+
+function renderP2Topics(){
+  $("p2TopicPanel").hidden=currentMod!=="p2_adv";
+  $("p2TopicTitle").textContent=textFor("選擇 P2 題型","Choose a P2 topic");
+  $("p2TopicNote").textContent=textFor(
+    "新題目跟隨所選題型；選「混合」可隨機練習四種。輔助工具會保留每題進度。",
+    "New questions use the selected topic. Mixed includes all four. Helper progress is kept for each question."
+  );
+  const labels={
+    sub:["退位減法","Borrowing"],
+    mul:["乘法分組","Multiplication"],
+    share:["除法平分","Sharing"],
+    group:["除法分組","Grouping"],
+    mixed:["混合練習","Mixed"]
+  };
+  document.querySelectorAll("[data-p2]").forEach(button=>{
+    const mode=button.dataset.p2;
+    button.textContent=textFor(...labels[mode]);
+    button.setAttribute("aria-pressed",String(mode===p2Mode));
+  });
+}
+
+function renderQuestion(){
+  const q=getCurrentQuestion();
+  if(!q) return;
+  dispose3D();
+  const st=stateOf(q);
+
+  document.querySelectorAll(".mod-tab").forEach(button=>{
+    const active=button.id==="tab_"+currentMod;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
+  renderP2Topics();
+
+  $("qBadge").textContent=q.level;
+  $("qBadge").className=q.isOlympiad?"level-pill olympiad":"level-pill";
+  $("qProgress").textContent=textFor(
+    `♾️ 第 ${historyCursor[currentMod]+1} 題${st.solved?" · 已完成":""}`,
+    `♾️ Question ${historyCursor[currentMod]+1}${st.solved?" · Solved":""}`
+  );
+  $("btnPrevQ").disabled=historyCursor[currentMod]<=0;
+  $("qTextZh").textContent=q.zh;
+  $("qTextEn").textContent=q.en;
+  $("qTextZh").hidden=langMode==="en";
+  $("qTextEn").hidden=langMode==="zh";
+
+  renderOptions(q);
+  updateHelperDrawerUI();
+  if(st.helperOpen) renderManipulativeContent();
+
+  if(st.feedbackZh||st.feedbackEn){
+    setRedBallSpeech(textFor(st.feedbackZh,st.feedbackEn));
+  }else{
+    setRedBallSpeech(textFor(
+      "Bouncy-bounce! 先自己試做。需要時打開工具，一步步操作，最後自己揀答案！",
+      "Bouncy-bounce! Try first. If needed, open the helper and work through the steps before choosing your answer!"
+    ));
+  }
+}
+
+function displayOption(opt){
+  // Numeric options use: number + Chinese unit + (English unit).
+  const match=opt.match(/^(\d+)\s+([^()]+)\s+\(([^()]+)\)$/);
+  if(match){
+    if(langMode==="zh") return `${match[1]} ${match[2].trim()}`;
+    if(langMode==="en") return `${match[1]} ${match[3]}`;
+    return opt;
+  }
+  const shape=opt.match(/^(.+)（(.+)）$/);
+  if(shape){
+    if(langMode==="zh") return shape[1];
+    if(langMode==="en") return shape[2];
+  }
+  return opt;
+}
+
+function renderOptions(q){
+  const st=stateOf(q);
+  $("optionsGrid").replaceChildren();
+  q.options.forEach(opt=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="option-btn";
+    const wrong=st.wrong.includes(opt);
+    const correct=st.solved&&opt===q.ans;
+    button.textContent=(correct?"✓ ":wrong?"✗ ":"")+displayOption(opt);
+    button.disabled=st.solved||wrong;
+    button.classList.toggle("wrong-choice",wrong);
+    button.classList.toggle("correct-choice",correct);
+    button.onclick=()=>checkOption(button,opt,q);
+    $("optionsGrid").appendChild(button);
+  });
+}
+
+function toggleVisualHelper(){
+  const q=getCurrentQuestion(), st=stateOf(q);
+  st.helperOpen=!st.helperOpen;
+  if(st.helperOpen) st.usedHelper=true;
+  updateHelperDrawerUI();
+  if(st.helperOpen) renderManipulativeContent();
+}
+
+function updateHelperDrawerUI(){
+  const q=getCurrentQuestion();
+  if(!q) return;
+  const open=stateOf(q).helperOpen;
+  $("manipulativeDrawer").hidden=!open;
+  $("btnToggleHelper").classList.toggle("off-state",!open);
+  $("btnToggleHelper").setAttribute("aria-expanded",String(open));
+  $("btnToggleHelper").textContent=open
+    ?textFor("🙈 隱藏輔助工具","🙈 Hide helper")
+    :textFor("👁️ 打開輔助工具","👁️ Show helper");
+  $("helperLabelText").textContent=open
+    ?textFor("🛠️ 輔助工具已開啟","🛠️ Interactive helper is ON")
+    :textFor("🛠️ 先試做，需要時再打開工具","🛠️ Try first; open the helper when needed");
+  if(!open) dispose3D();
+}
+
+/* ==========================================================
+   Original helper types
+   ========================================================== */
+function renderManipulativeContent(){
+  const q=getCurrentQuestion(), container=$("manipulativeContent");
+  dispose3D();
+  container.replaceChildren();
+
+  if(q.helperType==="p2"){
+    renderP2Helper(q,container);
+    return;
+  }
+
+  const guidance=document.createElement("div");
+  guidance.className="helper-guidance";
+  guidance.textContent=textFor(q.clueZh,q.clueEn);
+  container.appendChild(guidance);
+
+  if(q.helperType==="tenframe"){
+    const st=stateOf(q);
+    const note=document.createElement("p");
+    note.className="helper-note";
+    note.textContent=textFor(
+      "每格按一次變綠色，再按變紅色，再按清空。紅色代表甚麼，請跟隨上面的題目指示。",
+      "Click a cell: green → red → empty. Follow the instructions above for what red means in this question."
+    );
+    container.appendChild(note);
+    const holder=document.createElement("div");
+    holder.className="frames-wrapper";
+    holder.style.marginTop="12px";
+    for(let frame=0;frame<2;frame++){
+      const box=document.createElement("div");
+      box.className="ten-frame-box";
+      for(let cell=0;cell<10;cell++){
+        const index=frame*10+cell;
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="tf-cell";
+        const update=()=>{
+          const value=st.tfDots[index];
+          button.innerHTML=value?`<span class="tf-dot ${value===1?"green-dot":"coral-dot"}"></span>`:"";
+          button.setAttribute("aria-label",textFor(
+            `第 ${index+1} 格：${["空白","綠色","紅色"][value]}`,
+            `Cell ${index+1}: ${["empty","green","red"][value]}`
+          ));
+        };
+        button.onclick=()=>{
+          st.tfDots[index]=(st.tfDots[index]+1)%3;
+          update();
+        };
+        update();
+        box.appendChild(button);
       }
+      holder.appendChild(box);
+    }
+    container.appendChild(holder);
+  }else if(q.helperType==="barmodel"){
+    const wrap=document.createElement("div");
+    wrap.className="bar-visualizer";
+    q.bars.forEach(bar=>{
+      const row=document.createElement("div");
+      row.className="bar-row";
+      row.innerHTML=`
+        <div class="bar-label">${esc(textFor(bar.zh,bar.en))}</div>
+        <div class="bar-track">
+          <div class="bar-block" style="width:${bar.width}%;background:${bar.color}">
+            ${esc(bar.text)}
+          </div>
+        </div>`;
+      wrap.appendChild(row);
+    });
+    container.appendChild(wrap);
+  }else if(q.helperType==="threejs"){
+    render3DShape(q.shapeKey,container);
+  }else if(q.helperType==="threejs-gallery"){
+    render3DGallery(q.galleryKeys,container);
+  }
+}
+
+/* ==========================================================
+   Integrated P2 helper
+   Uses the base app's current question, score and history.
+   No separate question generator or duplicate stars.
+   ========================================================== */
+function p2Tokens(symbol,count){
+  return Array.from({length:count},()=>`<span class="p2-token">${symbol}</span>`).join("");
+}
+
+function p2MaxStep(q){
+  if(q.mode==="sub") return 3;
+  if(q.mode==="mul") return q.groups;
+  return q.k;
+}
+
+function p2Pool(left){
+  return `
+    <div class="p2-pool">
+      <div class="p2-pool-label">${esc(textFor(`未分：${left}`,`Not yet shared/grouped: ${left}`))}</div>
+      <div class="p2-pool-items">${left?p2Tokens("🍪",left):"✓"}</div>
+    </div>`;
+}
+
+function renderP2Helper(q,container){
+  const st=stateOf(q);
+  const step=st.step;
+  let html="",zh="",en="",noteZh="",noteEn="",nextZh="",nextEn="",ariaZh="",ariaEn="";
+
+  if(q.mode==="sub"){
+    const {at,ao,bt,bo}=q;
+    const tens=step>=1?at-1:at;
+    const ones=step>=1?ao+10:ao;
+    let rods="",cubes="";
+
+    for(let i=0;i<tens;i++){
+      const gone=step>=3&&i>=tens-bt;
+      rods+=`<div class="p2-rod ${gone?"p2-gone":""}">${"<i></i>".repeat(10)}</div>`;
+    }
+    for(let i=0;i<ones;i++){
+      const gone=step>=2&&i>=ones-bo;
+      cubes+=`<div class="p2-cube ${step>=1&&i>=ao?"new":""} ${gone?"p2-gone":""}"></div>`;
+    }
+    html=`
+      <div class="p2-col">
+        <div class="p2-rods">${rods}</div>
+        <div class="p2-label">${esc(textFor("十位","Tens"))}</div>
+      </div>
+      <div class="p2-col">
+        <div class="p2-ones">${cubes}</div>
+        <div class="p2-label">${esc(textFor("個位","Ones"))}</div>
+      </div>`;
+
+    const messages=[
+      [
+        `① 個位先：${ao} 個一不夠拎走 ${bo} 個一。把一個十換成十個一。`,
+        `① There are only ${ao} ones, not enough to remove ${bo}. Exchange one ten for ten ones.`,
+        "換一個十","Exchange 1 ten"
+      ],
+      [
+        `② 換完有 ${at-1} 個十、${ao+10} 個一，總值不變：${q.a} = ${(at-1)*10} + ${ao+10}。`,
+        `② Now there are ${at-1} tens and ${ao+10} ones. The value is unchanged: ${q.a} = ${(at-1)*10} + ${ao+10}.`,
+        `拎走 ${bo} 個一`,`Remove ${bo} ones`
+      ],
+      [
+        `③ 個位：${ao+10} − ${bo} = ${ao+10-bo}。接著處理十位。`,
+        `③ Ones: ${ao+10} − ${bo} = ${ao+10-bo}. Now subtract the tens.`,
+        `拎走 ${bt} 個十`,`Remove ${bt} tens`
+      ],
+      [
+        "④ 數未劃走的十和一，再揀答案。記住一條長棒代表十，不是一。",
+        "④ Count the tens and ones NOT crossed out, then choose your answer. Each rod is ten, not one.",
+        "",""
+      ]
     ];
+    [zh,en,nextZh,nextEn]=messages[step];
+    noteZh="每條長棒代表 10，每粒方塊代表 1。新換出的方塊是藍色；淡色加斜線表示已拎走。";
+    noteEn="Each rod is 10; each cube is 1. Exchanged cubes are blue. Faded, crossed-out blocks have been removed.";
+    ariaZh=`顯示 ${tens} 個十和 ${ones} 個一；已劃走 ${step>=3?bt:0} 個十和 ${step>=2?bo:0} 個一。`;
+    ariaEn=`${tens} tens and ${ones} ones shown; ${step>=3?bt:0} tens and ${step>=2?bo:0} ones crossed out.`;
+  }
 
-    function buildShapeNumOptions(correct) {
-      const set = new Set([correct]);
-      const cands = [correct + 1, correct - 1, correct + 2, correct - 2, 6, 8, 12, 5, 2, 1, 0, 3];
-      for (const c of cands) {
-        if (set.size === 4) break;
-        if (c >= 0) set.add(c);
-      }
-      let pad = 3;
-      while (set.size < 4) { set.add(correct + pad); pad++; }
-      return { ans: String(correct), options: shuffleArray(Array.from(set).map(String)) };
+  if(q.mode==="mul"){
+    for(let i=0;i<q.groups;i++){
+      const filled=i<step;
+      const running=i===q.groups-1?"?":String((i+1)*q.per);
+      html+=`
+        <div class="p2-groupbox">
+          <div class="p2-group ${filled?"":"empty"}">${filled?p2Tokens("🥟",q.per):"?"}</div>
+          <div class="p2-caption">${esc(filled
+            ?textFor(`累計：${running}`,`Running total: ${running}`)
+            :textFor("未加入","Not added"))}</div>
+        </div>`;
     }
+    const skip=Array.from({length:Math.min(step,q.groups-1)},(_,i)=>(i+1)*q.per).join(" → ");
+    if(step===0){
+      zh=`① 每隻蒸籠 ${q.per} 件，要有 ${q.groups} 隻蒸籠。每按一次加入一組。`;
+      en=`① Each basket has ${q.per} pieces. Build ${q.groups} baskets, adding one group each time.`;
+    }else if(step<q.groups){
+      zh=`② 跳數：${skip}。下一組再加 ${q.per}。`;
+      en=`② Skip count: ${skip}. Add ${q.per} for the next group.`;
+    }else{
+      zh=`③ ${skip} → ?。最後再加 ${q.per}，一共有多少件？`;
+      en=`③ ${skip} → ?. Add ${q.per} one last time. How many pieces altogether?`;
+    }
+    if(step<q.groups){
+      nextZh=`加一組（${step+1}/${q.groups}）`;
+      nextEn=`Add a group (${step+1}/${q.groups})`;
+    }
+    noteZh=`這題用 ${q.per} × ${q.groups} 表示「${q.groups} 組，每組 ${q.per} 件」。框下數字是累計，不是該組件數。`;
+    noteEn=`Here ${q.per} × ${q.groups} represents ${q.groups} groups of ${q.per}. Numbers below baskets are running totals, not the contents of one basket.`;
+    ariaZh=`已加入 ${step} 組，每組 ${q.per} 件，共需 ${q.groups} 組。`;
+    ariaEn=`${step} of ${q.groups} groups added, with ${q.per} pieces in each added group.`;
+  }
 
-    const ProceduralGenerator = {
-      p1_num() {
-        const archetype = pickOne(['make10_add', 'break10_sub', 'missing_addend']);
-        if (archetype === 'make10_add') {
-          const a = randInt(6, 9);
-          const b = randInt(11 - a, 9);
-          const sum = a + b;
-          const { ans, options } = buildOptions(sum, [sum - 1, sum + 1, sum - 2]);
-          return {
-            level: "P1 湊十進位加法 · Make-10 Addition",
-            zh: `計算：${a} + ${b} = ?`,
-            en: `Calculate: ${a} + ${b} = ?`,
-            options, ans, helperType: "tenframe",
-            hintZh: `用湊十法：${a} 爭 ${10 - a} 湊成 10，將 ${b} 拆開，10 + ${b - (10 - a)} = ${sum}。`,
-            hintEn: `Make-10: ${a} needs ${10 - a} more. 10 + ${b - (10 - a)} = ${sum}.`
-          };
-        }
-        if (archetype === 'break10_sub') {
-          const min = randInt(11, 18);
-          const ones = min - 10;
-          const sub = randInt(ones + 1, 9);
-          const diff = min - sub;
-          const { ans, options } = buildOptions(diff, [diff + 1, diff - 1, 10 + (sub - ones)]);
-          return {
-            level: "P1 破十減法 · Regrouping Subtraction",
-            zh: `計算：${min} - ${sub} = ?`,
-            en: `Calculate: ${min} - ${sub} = ?`,
-            options, ans, helperType: "tenframe",
-            hintZh: `Furry Red Ball 提示：將 ${min} 拆做 10 同 ${ones}，10 - ${sub} = ${10 - sub}，再加返 ${ones} 等於 ${diff}。`,
-            hintEn: `Furry Red Ball hint: Break ${min} into 10 and ${ones}. 10 - ${sub} = ${10 - sub}, then add ${ones} = ${diff}.`
-          };
-        }
-        const a = randInt(5, 9);
-        const miss = randInt(4, 9);
-        const tot = a + miss;
-        const { ans, options } = buildOptions(miss, [tot + a, miss + 1, miss - 1]);
-        return {
-          level: "P1 未知加數 · Missing Addend",
-          zh: `填空：${a} + [ ? ] = ${tot}`,
-          en: `Fill in the blank: ${a} + [ ? ] = ${tot}`,
-          options, ans, helperType: "tenframe",
-          hintZh: `用總數 ${tot} 減去 ${a}：${tot} - ${a} = ${miss}。`,
-          hintEn: `Subtract ${a} from total ${tot}: ${tot} - ${a} = ${miss}.`
-        };
-      },
+  if(q.mode==="share"){
+    const left=q.total-step*q.d;
+    html=p2Pool(left);
+    for(let i=0;i<q.d;i++){
+      html+=`
+        <div class="p2-groupbox">
+          <div class="p2-plate">${step?p2Tokens("🍪",step):"—"}</div>
+          <div class="p2-caption">${esc(textFor(`碟 ${i+1}`,`Plate ${i+1}`))}</div>
+        </div>`;
+    }
+    if(step===0){
+      zh=`① 將 ${q.total} 塊餅平均分到 ${q.d} 隻碟，每輪每碟放一塊。`;
+      en=`① Share ${q.total} cookies equally onto ${q.d} plates. Give one to each plate per round.`;
+    }else if(left>0){
+      zh=`② 仲有 ${left} 塊未分。每碟一樣多，繼續平均分。`;
+      en=`② ${left} cookies remain. Keep sharing equally.`;
+    }else{
+      zh="③ 分晒喇！只數一隻碟，裡面有多少塊餅？";
+      en="③ All shared! Count cookies on ONE plate. How many are there?";
+    }
+    if(left>0){
+      nextZh="每碟放一塊";
+      nextEn="Give 1 to each plate";
+    }
+    noteZh="答案是「每碟多少塊」，不是碟的數目。";
+    noteEn="The answer is cookies per plate, not the number of plates.";
+    ariaZh=`還有 ${left} 塊未分。${q.d} 隻碟，每碟有 ${step} 塊。`;
+    ariaEn=`${left} cookies remain unshared. ${q.d} plates, each holding ${step} cookies.`;
+  }
 
-      p1_word() {
-        const archetype = pickOne(['comp_more', 'two_step_bus', 'hk_money']);
-        if (archetype === 'comp_more') {
-          const a = randInt(7, 14);
-          const diff = randInt(4, 8);
-          const b = a + diff;
-          const { ans, options } = buildOptions(b, [Math.max(1, a - diff), b + 1, b - 1], "粒");
-          return {
-            level: "P1 比較型逆向題 · Comparison Trap",
-            zh: `小華有 ${a} 粒士多啤梨，小華「比」小明「少」${diff} 粒。請問小明有士多啤梨多少粒？`,
-            en: `Wah has ${a} strawberries. Wah has ${diff} FEWER than Ming. How many strawberries does Ming have?`,
-            options, ans, helperType: "barmodel",
-            bars: [{ label: "小華 Wah", width: 45, text: `${a}`, color: "#529C47" }, { label: "小明 Ming", width: 80, text: `${a} + ${diff} = ?`, color: "#88CB9D" }],
-            hintZh: `小華比小明少，即係小明多啲！列式：${a} + ${diff} = ${b} 粒。`,
-            hintEn: `Wah has fewer, so Ming has more! Formula: ${a} + ${diff} = ${b}.`
-          };
-        }
-        if (archetype === 'two_step_bus') {
-          const st = randInt(20, 32);
-          const off = randInt(6, 10);
-          const on = randInt(5, 12);
-          const ansVal = st - off + on;
-          const { ans, options } = buildOptions(ansVal, [st - off, st + off + on, ansVal - 2], "人");
-          return {
-            level: "P2 兩步應用題 · Two-Step Word Problem",
-            zh: `港鐵車廂原本有 ${st} 人，到站後有 ${off} 人落車，再有 ${on} 人上車。現在車廂內有乘客多少人？`,
-            en: `There were ${st} passengers on a train. ${off} got off and ${on} got on. How many passengers are there now?`,
-            options, ans, helperType: "barmodel",
-            bars: [{ label: "第 1 步", width: 55, text: `${st} - ${off} = ${st - off}`, color: "#736D71" }, { label: "第 2 步", width: 85, text: `${st - off} + ${on} = ?`, color: "#529C47" }],
-            hintZh: `兩步計算：${st} - ${off} = ${st - off}，然後 ${st - off} + ${on} = ${ansVal} 人。`,
-            hintEn: `Step 1: ${st} - ${off} = ${st - off}. Step 2: ${st - off} + ${on} = ${ansVal}.`
-          };
-        }
-        const p1 = randInt(12, 22);
-        const p2 = randInt(11, 18);
-        const tot = p1 + p2;
-        const change = 50 - tot;
-        const { ans, options } = buildOptions(change, [change + 10, tot, change - 2], "元");
-        return {
-          level: "P2 香港貨幣與找續 · HK Money & Change",
-          zh: `買果汁要 ${p1} 元，買餅乾要 ${p2} 元。付一張 50 元紙幣，應找回多少元？`,
-          en: `Juice costs $${p1} and biscuits cost $${p2}. If paying with a $50 note, how much change is returned?`,
-          options, ans, helperType: "barmodel",
-          bars: [{ label: "付 Paid", width: 90, text: "$50", color: "#736D71" }, { label: "售價 Cost", width: 65, text: `$${p1} + $${p2} = $${tot}`, color: "#529C47" }],
-          hintZh: `總售價：${p1} + ${p2} = ${tot} 元。找續：50 - ${tot} = ${change} 元。`,
-          hintEn: `Total: $${p1} + $${p2} = $${tot}. Change: $50 - $${tot} = $${change}.`
-        };
-      },
+  if(q.mode==="group"){
+    const left=q.total-step*q.d;
+    html=p2Pool(left);
+    for(let i=0;i<step;i++){
+      html+=`
+        <div class="p2-groupbox">
+          <div class="p2-group">${p2Tokens("🍪",q.d)}</div>
+          <div class="p2-caption">${esc(textFor(`每組 ${q.d} 塊`,`${q.d} per group`))}</div>
+        </div>`;
+    }
+    if(step===0){
+      zh=`① 有 ${q.total} 塊餅，每次拎 ${q.d} 塊放成一組。`;
+      en=`① Start with ${q.total} cookies. Take ${q.d} at a time to make one group.`;
+    }else if(left>0){
+      zh=`② 每分一組就用去 ${q.d} 塊。仲有 ${left} 塊，繼續分組。`;
+      en=`② Each group uses ${q.d} cookies. ${left} remain; make another group.`;
+    }else{
+      zh="③ 分晒喇！數有多少組，再揀答案。";
+      en="③ No cookies remain. Count the GROUPS, then choose your answer.";
+    }
+    if(left>0){
+      nextZh=`分出一組（${q.d} 塊）`;
+      nextEn=`Make a group of ${q.d}`;
+    }
+    noteZh="每組的數量已知道。這題要找的是「有多少組」，不是一組有多少塊。";
+    noteEn="The group size is already known. Find the number of GROUPS, not cookies in one group.";
+    ariaZh=`還有 ${left} 塊未分，已完成 ${step} 組，每組 ${q.d} 塊。`;
+    ariaEn=`${left} cookies remain ungrouped. ${step} completed groups of ${q.d} cookies.`;
+  }
 
-      p2_adv() {
-        const archetype = pickOne(['borrow_2digit', 'mult_groups']);
-        if (archetype === 'borrow_2digit') {
-          const t1 = randInt(5, 8);
-          const o1 = randInt(1, 4);
-          const t2 = randInt(1, t1 - 2);
-          const o2 = randInt(o1 + 3, 9);
-          const n1 = t1 * 10 + o1;
-          const n2 = t2 * 10 + o2;
-          const diff = n1 - n2;
-          const { ans, options } = buildOptions(diff, [diff + 10, (t1 - t2) * 10 + (o2 - o1), diff - 2]);
-          return {
-            level: "P2 兩位數退位減法 · 2-Digit Borrowing",
-            zh: `計算：${n1} - ${n2} = ?`,
-            en: `Calculate: ${n1} - ${n2} = ?`,
-            options, ans, helperType: "barmodel",
-            bars: [{ label: "退位借一", width: 85, text: `${n1} = ${(t1 - 1) * 10} + ${10 + o1}`, color: "#529C47" }],
-            hintZh: `個位 ${o1} 借 1 個十變成 ${10 + o1} - ${o2} = ${10 + o1 - o2}。十位剩 ${t1 - 1} - ${t2} = ${t1 - 1 - t2}。答案 ${diff}。`,
-            hintEn: `Regroup: ${10 + o1} - ${o2} = ${10 + o1 - o2}, then tens: ${t1 - 1} - ${t2} = ${t1 - 1 - t2}. Answer: ${diff}.`
-          };
-        }
-        const per = randInt(2, 5);
-        const grp = randInt(4, 7);
-        const tot = per * grp;
-        const { ans, options } = buildOptions(tot, [per + grp, tot + per, tot - per], "件");
-        return {
-          level: "P2 乘法概念 · Multiplication Groups",
-          zh: `每隻蒸籠有 ${per} 件點心，${grp} 隻蒸籠共有點心多少件？ (${per} × ${grp})`,
-          en: `Each basket has ${per} Dim Sum. How many in ${grp} baskets? (${per} × ${grp})`,
-          options, ans, helperType: "barmodel",
-          bars: [{ label: "乘法", width: 85, text: `${grp} 個 ${per} 相加 = ?`, color: "#529C47" }],
-          hintZh: `${per} 乘 ${grp} 即係 ${grp} 個 ${per} 相加，等於 ${tot} 件。`,
-          hintEn: `${per} × ${grp} = ${tot}.`
-        };
-      },
+  container.innerHTML=`
+    <div class="p2-msg" id="p2Message" aria-live="polite"></div>
+    <div class="p2-stage" id="p2Stage" role="img"></div>
+    <p class="helper-note" id="p2VisualNote"></p>
+    <div class="p2-controls" id="p2Controls"></div>`;
 
-      olympiad() {
-        const archetype = pickOne(['queue', 'sawing', 'age']);
-        if (archetype === 'queue') {
-          const f = randInt(4, 8);
-          const b = randInt(4, 7);
-          const tot = f + b - 1;
-          const { ans, options } = buildOptions(tot, [f + b, tot - 1, f + b + 1], "人");
-          return {
-            level: "🏆 奧數：排隊重疊問題 · Queue Logic",
-            isOlympiad: true,
-            zh: `小朋友排隊買雪糕。由前數起 Furry Red Ball 排第 ${f}，由後數起排第 ${b}。這隊共有多少人？`,
-            en: `Furry Red Ball is ${f}th from the front and ${b}th from the back. How many people in the queue?`,
-            options, ans, helperType: "barmodel",
-            bars: [{ label: "排隊重疊", width: 90, text: `前 ${f-1} 人 + [Furry Red Ball] + 後 ${b-1} 人`, color: "#D94E4E" }],
-            hintZh: `Furry Red Ball 自己被重複數了兩次！列式：${f} + ${b} - 1 = ${tot} 人。`,
-            hintEn: `Furry Red Ball was counted twice! ${f} + ${b} - 1 = ${tot}.`
-          };
-        }
-        if (archetype === 'sawing') {
-          const pieces = randInt(3, 6);
-          const cuts = pieces - 1;
-          const min = randInt(2, 4);
-          const tot = cuts * min;
-          const { ans, options } = buildOptions(tot, [pieces * min, tot - min, tot + min], "分鐘");
-          return {
-            level: "🏆 奧數：鋸木間隔問題 · Interval Logic",
-            isOlympiad: true,
-            zh: `把木頭鋸成 ${pieces} 段，每鋸一次要 ${min} 分鐘。全部鋸完一共需要多少分鐘？`,
-            en: `To saw a log into ${pieces} pieces, each cut takes ${min} mins. How many minutes in total?`,
-            options, ans, helperType: "barmodel",
-            bars: [{ label: "刀數", width: 90, text: `鋸成 ${pieces} 段只需鋸 ${cuts} 刀`, color: "#529C47" }],
-            hintZh: `刀數 = 段數 - 1。鋸 ${pieces} 段只需鋸 ${cuts} 刀：${cuts} × ${min} = ${tot} 分鐘。`,
-            hintEn: `Cuts = pieces - 1. ${cuts} cuts × ${min} mins = ${tot} mins.`
-          };
-        }
-        const gap = randInt(3, 6);
-        const yLater = randInt(4, 9);
-        const { ans, options } = buildOptions(gap, [gap + yLater, yLater, gap + 1], "歲");
-        return {
-          level: "🏆 奧數：年齡差不變 · Age Invariance",
-          isOlympiad: true,
-          zh: `今年哥哥比妹妹大 ${gap} 歲。請問 ${yLater} 年之後，哥哥比妹妹大多少歲？`,
-          en: `Big brother is ${gap} years older than sister today. In ${yLater} years, how many years older will he be?`,
-          options, ans, helperType: "barmodel",
-          bars: [{ label: "年齡差", width: 85, text: `兩人同長大，相差永遠是 ${gap} 歲`, color: "#736D71" }],
-          hintZh: `兩人每年一同長大 1 歲，年齡差距永遠不變，仍然是大 ${gap} 歲！`,
-          hintEn: `Both grow older together, the difference never changes: ${gap} years!`
-        };
-      },
+  $("p2Message").textContent=textFor(zh,en);
+  $("p2Stage").innerHTML=html;
+  $("p2Stage").setAttribute("aria-label",textFor(ariaZh,ariaEn));
+  $("p2VisualNote").textContent=textFor(noteZh,noteEn);
 
-      shapes3d() {
-        const base = { printOptions: true, isOlympiad: false };
-
-        /* ~45% of the time: a property / comparison question answered by picking a shape */
-        if (Math.random() < 0.45) {
-          const c = pickOne(CONCEPT_ASKS);
-          const nameOf = (k) => `${SHAPE_LIB[k].zh}（${SHAPE_LIB[k].en}）`;
-          const correct = nameOf(c.ansShape);
-          const distract = shuffleArray(SHAPE_KEYS.filter(k => k !== c.ansShape))
-            .slice(0, 3)
-            .map(nameOf);
-          const options = shuffleArray([correct, ...distract]);
-          return Object.assign({}, base, {
-            level: "3D 圖形概念 · Shape Properties",
-            zh: c.zh,
-            en: c.en,
-            options,
-            ans: correct,
-            helperType: "threejs-gallery",
-            galleryKeys: options.map(o => SHAPE_KEYS.find(k => nameOf(k) === o)),
-            hintZh: c.hintZh,
-            hintEn: c.hintEn
-          });
-        }
-
-        const key = pickOne(SHAPE_KEYS);
-        const s = SHAPE_LIB[key];
-        const archetype = pickOne(['flat', 'curved', 'vertices', 'edges', 'everyday']);
-        Object.assign(base, { helperType: "threejs", shapeKey: key });
-        const factCardZh = `睇下 3D 圖形：${s.zh} 有 ${s.flat} 個平面、${s.curved} 個曲面、${s.vertices} 個頂點、${s.edges} 條棱。`;
-        const factCardEn = `Count it on the model: a ${s.en.toLowerCase()} has ${s.flat} flat face(s), ${s.curved} curved surface(s), ${s.vertices} vertex/vertices and ${s.edges} edge(s).`;
-
-        if (archetype === 'everyday') {
-          const ansStr = `${s.itemZh}（${s.itemEn}）`;
-          const distract = shuffleArray(SHAPE_KEYS.filter(k => k !== key))
-            .slice(0, 3)
-            .map(k => `${SHAPE_LIB[k].itemZh}（${SHAPE_LIB[k].itemEn}）`);
-          return Object.assign({}, base, {
-            level: "3D 圖形辨認 · Shape Recognition",
-            zh: `以下哪一件日常物件，形狀最接近「${s.zh}」？`,
-            en: `Which everyday object is closest in shape to a ${s.en.toLowerCase()}?`,
-            options: shuffleArray([ansStr, ...distract]),
-            ans: ansStr,
-            hintZh: `${s.zh} 的例子包括${s.itemZh}。${factCardZh}`,
-            hintEn: `A ${s.en.toLowerCase()} looks like a ${s.itemEn}. ${factCardEn}`
-          });
-        }
-
-        const asks = {
-          flat: {
-            level: "3D 立體圖形：平面數量 · Flat Faces",
-            zh: `「${s.zh}」一共有多少個平面？`,
-            en: `How many flat faces does a ${s.en.toLowerCase()} have?`,
-            n: s.flat
-          },
-          curved: {
-            level: "3D 立體圖形：曲面數量 · Curved Surfaces",
-            zh: `「${s.zh}」一共有多少個曲面？`,
-            en: `How many curved surfaces does a ${s.en.toLowerCase()} have?`,
-            n: s.curved
-          },
-          vertices: {
-            level: "3D 立體圖形：頂點數量 · Vertices",
-            zh: `「${s.zh}」一共有多少個頂點？`,
-            en: `How many vertices (corners) does a ${s.en.toLowerCase()} have?`,
-            n: s.vertices
-          },
-          edges: {
-            level: "3D 立體圖形：棱的數量 · Edges",
-            zh: `「${s.zh}」一共有多少條棱（直邊）？`,
-            en: `How many straight edges does a ${s.en.toLowerCase()} have?`,
-            n: s.edges
-          }
-        };
-        const a = asks[archetype];
-        const { ans, options } = buildShapeNumOptions(a.n);
-        return Object.assign({}, base, {
-          level: a.level,
-          zh: a.zh,
-          en: a.en,
-          options, ans,
-          hintZh: factCardZh,
-          hintEn: factCardEn
-        });
-      }
+  if(nextZh&&step<p2MaxStep(q)){
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="p2-step-btn";
+    button.id="p2Advance";
+    button.textContent=textFor(nextZh,nextEn);
+    button.onclick=()=>{
+      if(getCurrentQuestion()!==q||st.step>=p2MaxStep(q)) return;
+      st.step++;
+      renderManipulativeContent();
+      const focus=$("p2Advance")||$("p2Restart");
+      if(focus) focus.focus();
     };
-
-    /* ============================================================================
-       APPLICATION & STATE MANAGEMENT
-       ============================================================================ */
-    let currentMod = 'p1_num';
-    let langMode = 'bilingual';
-    let helperOpen = false;
-    let usedHelperThisQ = false;
-    let tfDots = Array(20).fill(0);
-    let printMode = 'current';
-
-    const questionHistory = { p1_num: [], p1_word: [], p2_adv: [], olympiad: [], shapes3d: [] };
-    const historyCursor = { p1_num: -1, p1_word: -1, p2_adv: -1, olympiad: -1, shapes3d: -1 };
-
-    const STATS_KEY = 'redball_stats_v5';
-    const STATS_DEFAULT = {
-      stars: 0, correct: 0, unassisted: 0,
-      logicTotal: 0, logicCorrect: 0, hints: 0,
-      shapeTotal: 0, shapeCorrect: 0
+    $("p2Controls").appendChild(button);
+  }
+  if(step>0){
+    const restart=document.createElement("button");
+    restart.type="button";
+    restart.className="p2-step-btn secondary";
+    restart.id="p2Restart";
+    restart.textContent=textFor("↺ 重新示範","↺ Restart helper");
+    restart.onclick=()=>{
+      st.step=0;
+      renderManipulativeContent();
+      const focus=$("p2Advance");
+      if(focus) focus.focus();
     };
+    $("p2Controls").appendChild(restart);
+  }
+}
 
-    function loadStats() {
-      let saved = {};
-      try {
-        saved = JSON.parse(localStorage.getItem(STATS_KEY) || '{}') || {};
-      } catch (err) {
-        saved = {};
+/* ==========================================================
+   Answer feedback and scoring
+   ========================================================== */
+function p2WrongHint(q,selected){
+  const value=parseInt(selected,10);
+  if(q.mode==="sub"){
+    if(value===q.swap){
+      return [
+        `檢查個位：不要倒轉做 ${q.bo} − ${q.ao}。保持原來的減法次序，先換一個十。`,
+        `Check the ones: do not reverse them to ${q.bo} − ${q.ao}. Keep the subtraction order and exchange a ten first.`
+      ];
+    }
+    if(value===q.answerValue+10){
+      return [
+        "檢查十位：換了一個十之後，十位要少一。",
+        "Check the tens: exchanging a ten leaves one fewer ten."
+      ];
+    }
+  }
+  if(q.mode==="mul"&&value===q.per+q.groups){
+    return [
+      `這題不是把 ${q.per} 和 ${q.groups} 直接相加，而是 ${q.groups} 組，每組 ${q.per} 件。`,
+      `Do not just add ${q.per} and ${q.groups}. Build ${q.groups} groups of ${q.per}.`
+    ];
+  }
+  return [q.clueZh,q.clueEn];
+}
+
+function checkOption(button,selected,q){
+  if(q!==getCurrentQuestion()) return;
+  const st=stateOf(q);
+  if(st.solved||button.disabled||st.wrong.includes(selected)) return;
+
+  const isLogic=["p1_word","olympiad","shapes3d"].includes(currentMod);
+  const isShape=currentMod==="shapes3d";
+  if(isLogic) stats.logicTotal++;
+  if(isShape) stats.shapeTotal++;
+
+  if(selected===q.ans){
+    st.solved=true;
+    stats.stars++;
+    stats.correct++;
+    if(!st.usedHelper&&!st.hadHint) stats.unassisted++;
+    if(isLogic) stats.logicCorrect++;
+    if(isShape) stats.shapeCorrect++;
+
+    st.feedbackZh=`🎉 好嘢！答案是 ${q.ans}。\n${q.solutionZh}`;
+    st.feedbackEn=`🎉 Correct!\n${q.solutionEn}`;
+    pokeRedBall();
+  }else{
+    st.wrong.push(selected);
+    st.hadHint=true;
+    stats.hints++;
+
+    const hint=q.helperType==="p2"?p2WrongHint(q,selected):[q.clueZh,q.clueEn];
+    st.feedbackZh="🤔 再試吓！"+hint[0];
+    st.feedbackEn="🤔 Try again! "+hint[1];
+
+    // P2 wrong answers open the relevant manipulative without
+    // resetting the step the child has already reached.
+    if(q.helperType==="p2"){
+      st.helperOpen=true;
+      st.usedHelper=true;
+    }
+  }
+
+  saveStats();
+  renderOptions(q);
+  $("qProgress").textContent=textFor(
+    `♾️ 第 ${historyCursor[currentMod]+1} 題${st.solved?" · 已完成":""}`,
+    `♾️ Question ${historyCursor[currentMod]+1}${st.solved?" · Solved":""}`
+  );
+  updateHelperDrawerUI();
+  if(st.helperOpen) renderManipulativeContent();
+  setRedBallSpeech(textFor(st.feedbackZh,st.feedbackEn));
+}
+
+function setRedBallSpeech(text){$("redballSpeech").textContent=text}
+
+function pokeRedBall(){
+  const svg=$("redballSvg");
+  svg.classList.remove("super-bounce");
+  void svg.getBoundingClientRect();
+  svg.classList.add("super-bounce");
+}
+
+function speakCurrentQuestion(lang){
+  const q=getCurrentQuestion();
+  if(!q||!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(lang==="en-US"?q.en:q.zh);
+  utterance.lang=lang;
+  const voices=speechSynthesis.getVoices();
+  const voice=voices.find(v=>v.lang.toLowerCase()===lang.toLowerCase());
+  if(voice) utterance.voice=voice;
+  speechSynthesis.speak(utterance);
+}
+
+/* ==========================================================
+   3D viewers, with SVG fallback
+   ========================================================== */
+let threeStates=[];
+let threeLoopId=0;
+const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SHAPE_COLOR={
+  cylinder:0x88cb9d,cube:0xf2b880,cuboid:0xe0a468,
+  cone:0xd94e4e,sphere:0x9bb7d4,pyramid:0xc5b3e6
+};
+
+function dispose3D(){
+  if(threeLoopId) cancelAnimationFrame(threeLoopId);
+  threeLoopId=0;
+  threeStates.forEach(st=>{
+    window.removeEventListener("resize",st.onResize);
+    st.mesh.traverse(object=>{
+      if(object.geometry) object.geometry.dispose();
+      if(object.material){
+        const materials=Array.isArray(object.material)?object.material:[object.material];
+        materials.forEach(material=>material.dispose());
       }
-      return Object.assign({}, STATS_DEFAULT, saved);
+    });
+    st.renderer.dispose();
+    if(st.renderer.forceContextLoss) st.renderer.forceContextLoss();
+    st.canvas.remove();
+  });
+  threeStates=[];
+}
+
+function startThreeLoop(){
+  if(threeLoopId||!threeStates.length) return;
+  const frame=()=>{
+    if(!threeStates.length){threeLoopId=0;return}
+    threeLoopId=requestAnimationFrame(frame);
+    threeStates.forEach(st=>{
+      if(!st.dragging&&!reducedMotion) st.mesh.rotation.y+=st.spin;
+      st.renderer.render(st.scene,st.camera);
+    });
+  };
+  threeLoopId=requestAnimationFrame(frame);
+}
+
+function shapeGeometry(key){
+  switch(key){
+    case "cylinder":return new THREE.CylinderGeometry(1,1,1.9,48);
+    case "cube":return new THREE.BoxGeometry(1.7,1.7,1.7);
+    case "cuboid":return new THREE.BoxGeometry(2.3,1.2,1.3);
+    case "cone":return new THREE.ConeGeometry(1.15,2.1,48);
+    case "sphere":return new THREE.SphereGeometry(1.25,32,24);
+    case "pyramid":return new THREE.ConeGeometry(1.4,2,4);
+    default:return new THREE.BoxGeometry(1.5,1.5,1.5);
+  }
+}
+
+function shapeSvgFallback(key){
+  const s='stroke="#3f7a36" stroke-width="2"';
+  const a="#cfeeda",b="#a9dcb9",c="#88cb9d";
+  let inner="";
+  if(key==="cylinder"){
+    inner=`<path d="M45 55 L45 145 A55 18 0 0 0 155 145 L155 55 Z" fill="${b}" ${s}/><ellipse cx="100" cy="55" rx="55" ry="18" fill="${a}" ${s}/>`;
+  }else if(key==="cube"){
+    inner=`<polygon points="62,72 118,48 158,70 102,94" fill="${a}" ${s}/><polygon points="62,72 102,94 102,152 62,130" fill="${c}" ${s}/><polygon points="102,94 158,70 158,128 102,152" fill="${b}" ${s}/>`;
+  }else if(key==="cuboid"){
+    inner=`<polygon points="34,84 118,52 172,74 88,106" fill="${a}" ${s}/><polygon points="34,84 88,106 88,150 34,128" fill="${c}" ${s}/><polygon points="88,106 172,74 172,118 88,150" fill="${b}" ${s}/>`;
+  }else if(key==="cone"){
+    inner=`<path d="M100 40 L155 145 A55 18 0 0 1 45 145 Z" fill="${b}" ${s}/><path d="M45 145 A55 18 0 0 1 155 145" fill="none" stroke="#3f7a36" stroke-dasharray="5 4"/>`;
+  }else if(key==="sphere"){
+    inner=`<circle cx="100" cy="100" r="56" fill="${c}" ${s}/><ellipse cx="80" cy="77" rx="20" ry="13" fill="${a}" opacity=".75"/>`;
+  }else{
+    inner=`<polygon points="100,40 42,145 100,168" fill="${c}" ${s}/><polygon points="100,40 158,145 100,168" fill="${b}" ${s}/><path d="M42 145 L100 126 L158 145 M100 40 L100 126" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  }
+  return `<svg class="shape-svg" viewBox="0 0 200 200" role="img" aria-label="${esc(shapeName(key))}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+}
+
+function makeShapeViewer(host,key,small=false){
+  const fallback=()=>{
+    host.innerHTML=shapeSvgFallback(key);
+    host.title=textFor("靜態圖：3D 不可用","Static fallback: 3D unavailable");
+    return false;
+  };
+  if(typeof THREE==="undefined") return fallback();
+
+  let renderer;
+  try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}
+  catch(error){return fallback()}
+
+  const width=host.clientWidth||260, height=host.clientHeight||200;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(width,height);
+  const canvas=renderer.domElement;
+  canvas.style.cssText="display:block;cursor:grab;touch-action:none";
+  canvas.tabIndex=0;
+  canvas.setAttribute("role","img");
+  canvas.setAttribute("aria-label",textFor(
+    `${SHAPE_LIB[key].zh}。拖動或按方向鍵旋轉。`,
+    `${SHAPE_LIB[key].en}. Drag or use arrow keys to rotate.`
+  ));
+  host.appendChild(canvas);
+
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,width/height,.1,100);
+  camera.position.set(0,.7,small?5.5:5.6);
+  camera.lookAt(0,0,0);
+  scene.add(new THREE.HemisphereLight(0xffffff,0xe6e4e5,.95));
+  const light=new THREE.DirectionalLight(0xffffff,.8);
+  light.position.set(4,6,5);
+  scene.add(light);
+
+  const geometry=shapeGeometry(key);
+  const poly=["cube","cuboid","pyramid"].includes(key);
+  const material=new THREE.MeshStandardMaterial({
+    color:SHAPE_COLOR[key],roughness:.6,metalness:.04,flatShading:poly
+  });
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.rotation.x=-.12;
+  if(key==="pyramid") mesh.rotation.y=Math.PI/4;
+  if(poly){
+    mesh.add(new THREE.LineSegments(
+      new THREE.EdgesGeometry(geometry,15),
+      new THREE.LineBasicMaterial({color:0x3f7a36})
+    ));
+  }
+  scene.add(mesh);
+
+  const st={renderer,canvas,scene,camera,mesh,dragging:false,spin:small?.007:.01,onResize:null};
+  let x=0,y=0;
+  canvas.addEventListener("pointerdown",event=>{
+    st.dragging=true;x=event.clientX;y=event.clientY;
+    canvas.style.cursor="grabbing";
+    try{canvas.setPointerCapture(event.pointerId)}catch(error){}
+  });
+  canvas.addEventListener("pointermove",event=>{
+    if(!st.dragging) return;
+    mesh.rotation.y+=(event.clientX-x)*.013;
+    mesh.rotation.x+=(event.clientY-y)*.013;
+    x=event.clientX;y=event.clientY;
+  });
+  const stop=event=>{
+    st.dragging=false;canvas.style.cursor="grab";
+    try{canvas.releasePointerCapture(event.pointerId)}catch(error){}
+  };
+  canvas.addEventListener("pointerup",stop);
+  canvas.addEventListener("pointercancel",stop);
+  canvas.addEventListener("keydown",event=>{
+    const direction={ArrowLeft:[0,-.15],ArrowRight:[0,.15],ArrowUp:[-.15,0],ArrowDown:[.15,0]}[event.key];
+    if(!direction) return;
+    event.preventDefault();
+    mesh.rotation.x+=direction[0];
+    mesh.rotation.y+=direction[1];
+  });
+  st.onResize=()=>{
+    const w=host.clientWidth||width,h=host.clientHeight||height;
+    renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+  };
+  window.addEventListener("resize",st.onResize);
+  threeStates.push(st);
+  return true;
+}
+
+function viewerInstruction(container){
+  const p=document.createElement("p");
+  p.className="helper-note";
+  p.style.marginBottom="10px";
+  p.textContent=textFor(
+    "拖動或聚焦圖形後按方向鍵旋轉。若 3D 不可用，會顯示靜態圖。",
+    "Drag, or focus a shape and use arrow keys, to rotate. A static image is shown if 3D is unavailable."
+  );
+  container.appendChild(p);
+}
+
+function render3DShape(key,container){
+  viewerInstruction(container);
+  const host=document.createElement("div");
+  host.className="three-single";
+  container.appendChild(host);
+  makeShapeViewer(host,key);
+  const label=document.createElement("div");
+  label.className="three-facts";
+  const s=SHAPE_LIB[key];
+  label.textContent=textFor(s.zh,s.en);
+  // Do not print all the property counts while the child is still answering.
+  if(stateOf(getCurrentQuestion()).solved){
+    label.textContent+="\n"+textFor(
+      `平面 ${s.flat} · 曲面 ${s.curved} · 頂點 ${s.vertices} · 直棱 ${s.edges}`,
+      `Flat faces ${s.flat} · Curved surfaces ${s.curved} · Vertices ${s.vertices} · Straight edges ${s.edges}`
+    );
+  }
+  container.appendChild(label);
+  startThreeLoop();
+}
+
+function render3DGallery(keys,container){
+  viewerInstruction(container);
+  const grid=document.createElement("div");
+  grid.className="three-gallery";
+  container.appendChild(grid);
+  const tiles=[];
+  keys.forEach(key=>{
+    const tile=document.createElement("div");
+    tile.className="three-tile";
+    const box=document.createElement("div");
+    box.className="three-tile-box";
+    const label=document.createElement("div");
+    label.className="three-tile-label";
+    label.textContent=textFor(SHAPE_LIB[key].zh,SHAPE_LIB[key].en);
+    tile.append(box,label);
+    grid.appendChild(tile);
+    tiles.push({key,box});
+  });
+  // Measure only after all grid tiles have been added.
+  tiles.forEach(tile=>makeShapeViewer(tile.box,tile.key,true));
+  startThreeLoop();
+}
+
+/* ==========================================================
+   Modal handling
+   ========================================================== */
+let modalReturnFocus=null;
+function openModal(id){
+  modalReturnFocus=document.activeElement;
+  $(id).classList.add("active");
+  const first=$(id).querySelector("button,input");
+  if(first) first.focus();
+}
+function closeModal(id){
+  $(id).classList.remove("active");
+  if(modalReturnFocus&&document.contains(modalReturnFocus)) modalReturnFocus.focus();
+}
+function openPrintModal(){openModal("printModal")}
+function closePrintModal(){closeModal("printModal")}
+function closeReportModal(){closeModal("reportModal")}
+
+document.addEventListener("keydown",event=>{
+  const modal=document.querySelector(".modal-overlay.active");
+  if(!modal) return;
+  if(event.key==="Escape"){
+    event.preventDefault();
+    closeModal(modal.id);
+    return;
+  }
+  if(event.key!=="Tab") return;
+  const nodes=[...modal.querySelectorAll("button,input,[tabindex]")].filter(el=>!el.disabled&&el.tabIndex>=0);
+  if(!nodes.length) return;
+  const first=nodes[0],last=nodes[nodes.length-1];
+  if(event.shiftKey&&document.activeElement===first){
+    event.preventDefault();last.focus();
+  }else if(!event.shiftKey&&document.activeElement===last){
+    event.preventDefault();first.focus();
+  }
+});
+
+document.querySelectorAll(".modal-overlay").forEach(modal=>{
+  modal.addEventListener("click",event=>{
+    if(event.target===modal) closeModal(modal.id);
+  });
+});
+
+/* ==========================================================
+   Worksheets
+   ========================================================== */
+function mixedPrintQuestions(){
+  return [
+    ProceduralGenerator.p1_num(),
+    ProceduralGenerator.p1_num(),
+    ProceduralGenerator.p1_word(),
+    ProceduralGenerator.p1_word(),
+    ProceduralGenerator.p2_adv("sub"),
+    ProceduralGenerator.p2_adv("mul"),
+    ProceduralGenerator.p2_adv("share"),
+    ProceduralGenerator.p2_adv("group"),
+    ProceduralGenerator.olympiad(),
+    ProceduralGenerator.shapes3d()
+  ];
+}
+
+function worksheetHTML(questions,includeAnswers){
+  let html=`
+    <div class="ws-header">
+      <div>
+        <div class="ws-title">小學數學工作紙 · Math Worksheet</div>
+        <div style="font-size:10pt">Furry Red Ball Math Explorer</div>
+      </div>
+      <div style="font-size:12pt;font-weight:900;white-space:nowrap">
+        得分 Score: ____ / ${questions.length===1?10:100}
+      </div>
+    </div>
+    <div class="ws-meta-row">
+      <div>姓名 Name: __________________</div>
+      <div>班別 Class: __________</div>
+      <div>日期 Date: ____________</div>
+    </div>`;
+
+  questions.forEach((q,index)=>{
+    const choices=q.printOptions
+      ?`<div class="ws-mcq">${q.options.map((opt,i)=>
+          `<span><span class="ws-mcq-circle"></span>${"ABCD"[i]}. ${esc(opt)}</span>`
+        ).join("")}</div>`
+      :"";
+    let scratch="";
+    if(q.helperType==="tenframe"){
+      scratch=`<div>
+        <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
+        <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
+      </div>`;
+    }else if(q.helperType==="p2"){
+      const prompt={
+        sub:"畫十棒和一粒，表示退位。Draw tens and ones.",
+        mul:"畫相同大小的組。Draw equal groups.",
+        share:"先畫碟，再平均分。Draw plates, then share equally.",
+        group:"圈出每組，再數組數。Circle equal groups, then count groups."
+      }[q.mode];
+      scratch=`<div style="margin-top:5px">${esc(prompt)}</div>`;
     }
-
-    let stats = loadStats();
-
-    function saveStats() {
-      localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-      document.getElementById('starScore').innerText = stats.stars;
-    }
-
-    function getCurrentQuestion() {
-      return questionHistory[currentMod][historyCursor[currentMod]];
-    }
-
-    function generateAndPushQuestion() {
-      const newQ = ProceduralGenerator[currentMod]();
-      questionHistory[currentMod].push(newQ);
-      historyCursor[currentMod] = questionHistory[currentMod].length - 1;
-      renderQuestion();
-    }
-
-    function prevQuestion() {
-      if (historyCursor[currentMod] > 0) {
-        historyCursor[currentMod]--;
-        renderQuestion();
-      }
-    }
-
-    function selectModule(modKey) {
-      currentMod = modKey;
-      document.querySelectorAll('.mod-tab').forEach(b => b.classList.remove('active'));
-      document.getElementById(`tab_${modKey}`).classList.add('active');
-      if (questionHistory[currentMod].length === 0) generateAndPushQuestion();
-      else renderQuestion();
-    }
-
-    function cycleLangMode() {
-      const modes = ['bilingual', 'zh', 'en'];
-      langMode = modes[(modes.indexOf(langMode) + 1) % modes.length];
-      const labels = { bilingual: '🌐 雙語 Bilingual', zh: '🇭🇰 繁體中文', en: '🇬🇧 English' };
-      document.getElementById('btnLangMode').innerText = labels[langMode];
-      renderQuestion();
-    }
-
-    function renderQuestion() {
-      const q = getCurrentQuestion();
-      dispose3D();
-      helperOpen = false;
-      usedHelperThisQ = false;
-      tfDots = Array(20).fill(0);
-      updateHelperDrawerUI();
-
-      const badge = document.getElementById('qBadge');
-      badge.innerText = q.level;
-      badge.className = q.isOlympiad ? 'level-pill olympiad' : 'level-pill';
-      document.getElementById('qProgress').innerText = `♾️ 動態生成 第 ${historyCursor[currentMod] + 1} 題`;
-      document.getElementById('btnPrevQ').disabled = (historyCursor[currentMod] <= 0);
-
-      const zhEl = document.getElementById('qTextZh');
-      const enEl = document.getElementById('qTextEn');
-      zhEl.style.display = (langMode === 'en') ? 'none' : 'block';
-      enEl.style.display = (langMode === 'zh') ? 'none' : 'block';
-      zhEl.innerText = q.zh;
-      enEl.innerText = q.en;
-
-      const grid = document.getElementById('optionsGrid');
-      grid.innerHTML = '';
-      q.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = opt;
-        btn.onclick = () => checkOption(btn, opt, q);
-        grid.appendChild(btn);
-      });
-
-      setRedBallSpeech(
-        langMode === 'en'
-          ? "Bouncy-bounce! Try solving on paper, or switch ON the visual helper below!"
-          : "Bouncy-bounce! 先自己動腦筋試下！撳「🖨️ 列印」仲可以隨時印出 A4 工作紙喺紙上面做！"
-      );
-    }
-
-    function toggleVisualHelper() {
-      helperOpen = !helperOpen;
-      if (helperOpen) usedHelperThisQ = true;
-      updateHelperDrawerUI();
-      if (helperOpen) renderManipulativeContent();
-    }
-
-    function updateHelperDrawerUI() {
-      const drawer = document.getElementById('manipulativeDrawer');
-      const btn = document.getElementById('btnToggleHelper');
-      const label = document.getElementById('helperLabelText');
-      if (helperOpen) {
-        drawer.classList.add('open');
-        btn.classList.remove('off-state');
-        btn.innerText = '🙈 隱藏輔助工具 Hide Helper';
-        label.innerText = '輔助工具已開啟 · Interactive Helper is ON';
-      } else {
-        drawer.classList.remove('open');
-        btn.classList.add('off-state');
-        btn.innerText = '👁️ 打開輔助工具 Show Helper';
-        label.innerText = '輔助工具（十格陣 / 條形圖 / 3D 立體圖）已隱藏，避免直接劇透答案 · Visual Helper is OFF';
-        dispose3D();
-      }
-    }
-
-    /* ============================================================================
-       THREE.JS 3D SHAPE VIEWER  (with graceful SVG fallback)
-       ============================================================================ */
-    let threeStates = [];
-    let threeLoopId = 0;
-
-    const SHAPE_COLOR = {
-      cylinder: 0x88cb9d, cube: 0xf2b880, cuboid: 0xe0a468,
-      cone: 0xd94e4e, sphere: 0x9bb7d4, pyramid: 0xc5b3e6
-    };
-
-    function dispose3D() {
-      try { cancelAnimationFrame(threeLoopId); } catch (e) { /* noop */ }
-      threeLoopId = 0;
-      threeStates.forEach(st => {
-        try { window.removeEventListener('resize', st.onResize); } catch (e) { /* noop */ }
-        try { st.renderer.dispose(); } catch (e) { /* noop */ }
-        try {
-          if (st.canvas && st.canvas.parentNode) st.canvas.parentNode.removeChild(st.canvas);
-        } catch (e) { /* noop */ }
-      });
-      threeStates = [];
-    }
-
-    function startThreeLoop() {
-      if (threeLoopId) return;
-      const step = () => {
-        if (!threeStates.length) { threeLoopId = 0; return; }
-        threeLoopId = requestAnimationFrame(step);
-        threeStates.forEach(st => {
-          if (!st.dragging) st.mesh.rotation.y += st.spin;
-          st.renderer.render(st.scene, st.camera);
-        });
-      };
-      threeLoopId = requestAnimationFrame(step);
-    }
-
-    /* Build one WebGL viewer inside `host`. Returns the state object (or null on fallback). */
-    function makeShapeViewer(host, key, opts) {
-      opts = opts || {};
-      if (!host) return null;
-      if (typeof THREE === 'undefined') {
-        host.innerHTML = shapeSvgFallback(key);
-        return null;
-      }
-      let renderer;
-      try {
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      } catch (err) {
-        host.innerHTML = shapeSvgFallback(key);
-        return null;
-      }
-      const w = host.clientWidth || 260;
-      const h = host.clientHeight || 170;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(w, h);
-      renderer.setClearColor(0x000000, 0);
-      const dom = renderer.domElement;
-      dom.style.display = 'block';
-      dom.style.cursor = 'grab';
-      dom.style.touchAction = 'none';
-      host.appendChild(dom);
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-      camera.position.set(0, 0.7, opts.dist || 5.6);
-      camera.lookAt(0, 0, 0);
-
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e4e5, 0.95));
-      const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
-      keyLight.position.set(4, 6, 5);
-      scene.add(keyLight);
-      const rim = new THREE.DirectionalLight(0xffffff, 0.35);
-      rim.position.set(-5, -3, -4);
-      scene.add(rim);
-
-      const polyhedra = ['cube', 'cuboid', 'pyramid'];
-      const geo = shapeGeometry(key);
-      const mat = new THREE.MeshStandardMaterial({
-        color: SHAPE_COLOR[key] || 0x88cb9d,
-        roughness: 0.6,
-        metalness: 0.04,
-        flatShading: polyhedra.indexOf(key) !== -1
-      });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.rotation.x = -0.12;
-      if (key === 'pyramid') mesh.rotation.y = Math.PI / 4;
-      scene.add(mesh);
-      if (polyhedra.indexOf(key) !== -1) {
-        mesh.add(new THREE.LineSegments(
-          new THREE.EdgesGeometry(geo, 15),
-          new THREE.LineBasicMaterial({ color: 0x3f7a36 })
-        ));
-      }
-
-      const st = {
-        renderer, canvas: dom, dom, scene, camera, mesh,
-        spin: opts.spin === undefined ? 0.01 : opts.spin,
-        dragging: false, onResize: null
-      };
-
-      let prevX = 0, prevY = 0;
-      dom.addEventListener('pointerdown', (e) => {
-        st.dragging = true; prevX = e.clientX; prevY = e.clientY;
-        dom.style.cursor = 'grabbing';
-        try { dom.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
-      });
-      dom.addEventListener('pointermove', (e) => {
-        if (!st.dragging) return;
-        const dx = e.clientX - prevX, dy = e.clientY - prevY;
-        prevX = e.clientX; prevY = e.clientY;
-        mesh.rotation.y += dx * 0.013;
-        mesh.rotation.x = Math.max(-1.25, Math.min(1.25, mesh.rotation.x + dy * 0.013));
-      });
-      const stopDrag = (e) => {
-        st.dragging = false;
-        dom.style.cursor = 'grab';
-        try { dom.releasePointerCapture(e.pointerId); } catch (err) { /* noop */ }
-      };
-      dom.addEventListener('pointerup', stopDrag);
-      dom.addEventListener('pointercancel', stopDrag);
-
-      st.onResize = () => {
-        const nw = host.clientWidth || w;
-        const nh = host.clientHeight || h;
-        if (!nw || !nh) return;
-        renderer.setSize(nw, nh);
-        camera.aspect = nw / nh;
-        camera.updateProjectionMatrix();
-      };
-      window.addEventListener('resize', st.onResize);
-
-      threeStates.push(st);
-      return st;
-    }
-
-    function shapeGeometry(key) {
-      switch (key) {
-        case 'cylinder': return new THREE.CylinderGeometry(1, 1, 1.9, 48);
-        case 'cube':     return new THREE.BoxGeometry(1.7, 1.7, 1.7);
-        case 'cuboid':   return new THREE.BoxGeometry(2.3, 1.2, 1.3);
-        case 'cone':     return new THREE.ConeGeometry(1.15, 2.1, 48);
-        case 'sphere':   return new THREE.SphereGeometry(1.25, 32, 24);
-        case 'pyramid':  return new THREE.ConeGeometry(1.4, 2.0, 4);
-        default:         return new THREE.BoxGeometry(1.5, 1.5, 1.5);
-      }
-    }
-
-    function shapeSvgFallback(key) {
-      const stroke = 'stroke="#3f7a36" stroke-width="2"';
-      const fillA = '#cfeeda', fillB = '#a9dcb9', fillC = '#88cb9d';
-      const wrap = (inner) => `<svg viewBox="0 0 200 200" style="width:100%;height:190px;display:block;margin:8px auto;" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
-      switch (key) {
-        case 'cylinder':
-          return wrap(`
-            <path d="M45 55 L45 145 A55 18 0 0 0 155 145 L155 55 Z" fill="${fillB}" ${stroke}/>
-            <ellipse cx="100" cy="55" rx="55" ry="18" fill="${fillA}" ${stroke}/>`);
-        case 'cube':
-          return wrap(`
-            <polygon points="62,72 118,48 158,70 102,94" fill="${fillA}" ${stroke}/>
-            <polygon points="62,72 102,94 102,152 62,130" fill="${fillC}" ${stroke}/>
-            <polygon points="102,94 158,70 158,128 102,152" fill="${fillB}" ${stroke}/>`);
-        case 'cuboid':
-          return wrap(`
-            <polygon points="34,84 118,52 172,74 88,106" fill="${fillA}" ${stroke}/>
-            <polygon points="34,84 88,106 88,150 34,128" fill="${fillC}" ${stroke}/>
-            <polygon points="88,106 172,74 172,118 88,150" fill="${fillB}" ${stroke}/>`);
-        case 'cone':
-          return wrap(`
-            <ellipse cx="100" cy="146" rx="55" ry="18" fill="${fillA}" ${stroke}/>
-            <path d="M100 46 L155 146 A55 18 0 0 1 45 146 Z" fill="${fillB}" ${stroke}/>`);
-        case 'sphere':
-          return wrap(`
-            <circle cx="100" cy="100" r="56" fill="${fillC}" ${stroke}/>
-            <ellipse cx="100" cy="100" rx="56" ry="20" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>
-            <ellipse cx="100" cy="100" rx="22" ry="56" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>`);
-        case 'pyramid':
-          return wrap(`
-            <polygon points="100,44 42,150 100,168" fill="${fillC}" ${stroke}/>
-            <polygon points="100,44 158,150 100,168" fill="${fillB}" ${stroke}/>
-            <polyline points="42,150 100,132 158,150" fill="none" stroke="#3f7a36" stroke-width="1.4" stroke-dasharray="5 4"/>`);
-        default:
-          return wrap(`<circle cx="100" cy="100" r="45" fill="${fillC}" ${stroke}/>`);
-      }
-    }
-
-    function render3DShape(key, container) {
-      dispose3D();
-      const s = SHAPE_LIB[key] || SHAPE_LIB.cube;
-      const wrap = document.createElement('div');
-      wrap.innerHTML = `
-        <div style="font-size:0.88rem;font-weight:800;color:var(--text-muted);text-align:center;margin-bottom:8px;">
-          🖐️ 用手指／滑鼠拖動可以旋轉圖形 · Drag to rotate the shape
-        </div>
-        <div class="three-single"></div>
-        <div style="font-size:0.85rem;font-weight:800;color:var(--text-muted);text-align:center;margin-top:8px;">
-          ${s.zh} · ${s.en} — 平面 Flat ${s.flat} · 曲面 Curved ${s.curved} · 頂點 Vertices ${s.vertices} · 棱 Edges ${s.edges}
-        </div>
-      `;
-      container.appendChild(wrap);
-      makeShapeViewer(wrap.querySelector('.three-single'), key, { dist: 5.6 });
-      startThreeLoop();
-    }
-
-    /* Side-by-side comparison of the option shapes — labels sit under each tile. */
-    function render3DGallery(keys, container) {
-      dispose3D();
-      const wrap = document.createElement('div');
-      const hint = document.createElement('div');
-      hint.style.cssText = 'font-size:0.88rem;font-weight:800;color:var(--text-muted);text-align:center;margin-bottom:8px;';
-      hint.innerText = '🖐️ 逐個拖動都可以旋轉，慢慢比較 · Drag any shape to rotate and compare';
-      wrap.appendChild(hint);
-
-      const grid = document.createElement('div');
-      grid.className = 'three-gallery';
-      wrap.appendChild(grid);
-      container.appendChild(wrap);
-
-      /* Pass 1 — build every tile first so the grid can lay out at its final size.
-         Measuring a tile while it is still the only child makes the canvas overflow
-         the tile box (grid auto-fit collapses empty tracks), which clips the solid. */
-      const tiles = [];
-      (keys || []).forEach(k => {
-        const info = SHAPE_LIB[k];
-        if (!info) return;
-        const tile = document.createElement('div');
-        tile.className = 'three-tile';
-        const box = document.createElement('div');
-        box.className = 'three-tile-box';
-        const lab = document.createElement('div');
-        lab.className = 'three-tile-label';
-        lab.innerText = info.zh;
-        const labEn = document.createElement('div');
-        labEn.className = 'three-tile-label-en';
-        labEn.innerText = info.en;
-        tile.appendChild(box);
-        tile.appendChild(lab);
-        tile.appendChild(labEn);
-        grid.appendChild(tile);
-        tiles.push({ key: k, box });
-      });
-
-      /* Pass 2 — layout is now final, so each canvas gets its real tile size. */
-      tiles.forEach(t => makeShapeViewer(t.box, t.key, { dist: 5.4, spin: 0.007 }));
-      startThreeLoop();
-    }
-
-    function renderManipulativeContent() {
-      const q = getCurrentQuestion();
-      const container = document.getElementById('manipulativeContent');
-      dispose3D();
-      container.innerHTML = '';
-
-      if (q.helperType === 'tenframe') {
-        const wrap = document.createElement('div');
-        wrap.className = 'ten-frame-stage';
-        wrap.innerHTML = `
-          <div style="font-size:0.9rem; font-weight:800; color:var(--text-muted); text-align:center;">
-            👆 點擊空格自己擺放波波（第 1 下綠色，第 2 下紅色，第 3 下清空）
+    html+=`
+      <div class="ws-item">
+        <div class="ws-q-num">${index+1}. ${esc(q.level)}</div>
+        <div class="ws-q-zh">${esc(q.zh)}</div>
+        <div class="ws-q-en">${esc(q.en)}</div>
+        ${choices}
+        <div class="ws-work-box">
+          <div class="ws-scratchpad">
+            <b>算草欄 Working Area</b>
+            ${scratch}
           </div>
-          <div class="frames-wrapper" id="tfFramesHolder"></div>
-        `;
-        container.appendChild(wrap);
-        const holder = document.getElementById('tfFramesHolder');
-        for (let f = 0; f < 2; f++) {
-          const box = document.createElement('div');
-          box.className = 'ten-frame-box';
-          for (let c = 0; c < 10; c++) {
-            const idx = f * 10 + c;
-            const cell = document.createElement('div');
-            cell.className = 'tf-cell';
-            if (tfDots[idx] === 1) cell.innerHTML = `<div class="tf-dot green-dot"></div>`;
-            else if (tfDots[idx] === 2) cell.innerHTML = `<div class="tf-dot coral-dot"></div>`;
-            cell.onclick = () => {
-              tfDots[idx] = (tfDots[idx] + 1) % 3;
-              renderManipulativeContent();
-            };
-            box.appendChild(cell);
-          }
-          holder.appendChild(box);
-        }
-      } else if (q.helperType === 'barmodel') {
-        const wrap = document.createElement('div');
-        wrap.className = 'bar-visualizer';
-        q.bars.forEach(b => {
-          const row = document.createElement('div');
-          row.className = 'bar-row';
-          row.innerHTML = `
-            <div class="bar-label">${b.label}</div>
-            <div class="bar-track">
-              <div class="bar-block" style="width:${b.width}%; background:${b.color};">${b.text}</div>
-            </div>
-          `;
-          wrap.appendChild(row);
-        });
-        container.appendChild(wrap);
-      } else if (q.helperType === 'threejs') {
-        render3DShape(q.shapeKey, container);
-      } else if (q.helperType === 'threejs-gallery') {
-        render3DGallery(q.galleryKeys, container);
-      }
-    }
-
-    function checkOption(btnEl, selectedVal, q) {
-      /* Word problems, olympiad and 3D shapes are reasoning, not arithmetic drill —
-         all three feed the logic rate; 3D additionally gets its own accuracy bucket. */
-      const isLogic = (currentMod === 'p1_word' || currentMod === 'olympiad' || currentMod === 'shapes3d');
-      const isShape = (currentMod === 'shapes3d');
-      if (selectedVal === q.ans) {
-        btnEl.classList.add('correct-choice');
-        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-        stats.stars++;
-        stats.correct++;
-        if (!usedHelperThisQ) stats.unassisted++;
-        if (isLogic) { stats.logicTotal++; stats.logicCorrect++; }
-        if (isShape) { stats.shapeTotal++; stats.shapeCorrect++; }
-        saveStats();
-        pokeRedBall();
-        const praise = (langMode === 'en') ? `Woohoo! ${selectedVal} is spot on!` : `好嘢！答案係 ${selectedVal}，完全正確！`;
-        setRedBallSpeech(praise);
-      } else {
-        btnEl.classList.add('wrong-choice');
-        btnEl.disabled = true;
-        stats.hints++;
-        if (isLogic) stats.logicTotal++;
-        if (isShape) stats.shapeTotal++;
-        saveStats();
-        const hint = (langMode === 'en') ? q.hintEn : q.hintZh;
-        setRedBallSpeech(hint);
-      }
-    }
-
-    function pokeRedBall() {
-      const svg = document.getElementById('redballSvg');
-      svg.classList.remove('super-bounce');
-      void svg.offsetWidth;
-      svg.classList.add('super-bounce');
-    }
-
-    function setRedBallSpeech(txt) {
-      document.getElementById('redballSpeech').innerText = txt;
-    }
-
-    function speakCurrentQuestion(langCode) {
-      const q = getCurrentQuestion();
-      const text = (langCode === 'en-US') ? q.en : q.zh;
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = langCode;
-      window.speechSynthesis.speak(utter);
-    }
-
-    /* ============================================================================
-       PRINT WORKSHEET SYSTEM
-       ============================================================================ */
-    function openPrintModal() {
-      document.getElementById('printModal').classList.add('active');
-    }
-
-    function closePrintModal() {
-      document.getElementById('printModal').classList.remove('active');
-    }
-
-    function setPrintMode(mode) {
-      printMode = mode;
-      document.getElementById('optPrintCurrent').classList.toggle('selected', mode === 'current');
-      document.getElementById('optPrint10').classList.toggle('selected', mode === '10mixed');
-      document.getElementById('optPrintCurrent').querySelector('span').innerText = (mode === 'current' ? '🔘' : '⚪');
-      document.getElementById('optPrint10').querySelector('span').innerText = (mode === '10mixed' ? '🔘' : '⚪');
-    }
-
-    function executePrintJob() {
-      closePrintModal();
-      const includeAnswers = document.getElementById('chkIncludeAnswers').checked;
-      let questionsToPrint = [];
-
-      if (printMode === 'current') {
-        questionsToPrint = [getCurrentQuestion()];
-      } else {
-        const mods = ['p1_num', 'p1_num', 'p1_word', 'p1_word', 'p2_adv', 'p2_adv', 'olympiad', 'olympiad', 'olympiad', 'shapes3d'];
-        questionsToPrint = mods.map(m => ProceduralGenerator[m]());
-      }
-
-      const container = document.getElementById('printWorksheetContainer');
-      container.innerHTML = '';
-
-      let html = `
-        <div class="ws-header">
-          <div>
-            <div class="ws-title">小學數學能力進階工作紙 · Math Exercise Worksheet</div>
-            <div style="font-size:10pt; color:#555;">Furry Red Ball Math Academy</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:14pt; font-weight:900; border:2px solid #000; padding:4px 14px; border-radius:4px;">
-              得分 Score: ________ / 100
-            </div>
+          <div class="ws-ans-zone">
+            ${q.printOptions?"":'<div>橫式 Equation: <span class="ws-line"></span></div>'}
+            <div>答案 Answer: <span class="ws-line"></span></div>
           </div>
         </div>
+      </div>`;
+  });
 
-        <div class="ws-meta-row">
-          <div>學生姓名 (Name): _______________________</div>
-          <div>班別 (Class): P. _____ ( )</div>
-          <div>日期 (Date): _________________</div>
-        </div>
-      `;
+  if(includeAnswers){
+    html+=`
+      <section class="ws-answer-page">
+        <div class="ws-answers-header">教師／家長答案頁 · Answer Key</div>
+        <table class="ws-answer-table">
+          <thead>
+            <tr><th>題號</th><th>答案 Answer</th><th>解題步驟 Worked explanation</th></tr>
+          </thead>
+          <tbody>
+            ${questions.map((q,index)=>`
+              <tr>
+                <td>${index+1}</td>
+                <td>${esc(q.ans)}</td>
+                <td>${esc(q.solutionZh)}<br>${esc(q.solutionEn)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </section>`;
+  }
+  return html;
+}
 
-      questionsToPrint.forEach((q, idx) => {
-        const isTenFrame = q.helperType === 'tenframe';
-        const mcqHtml = q.printOptions
-          ? '<div class="ws-mcq">' + q.options.map((o, oi) =>
-              '<span><span class="ws-mcq-circle"></span>' + 'ABCD'[oi] + '. ' + o + '</span>').join('') + '</div>'
-          : '';
-        const answerZone = q.printOptions
-          ? '<div>答 (Answer): <span class="ws-line"></span></div>'
-          : '<div>橫式 (Equation): <span class="ws-line" style="min-width:110px;"></span></div>' +
-            '<div>答 (Answer): <span class="ws-line"></span></div>';
-        html += `
-          <div class="ws-item">
-            <div class="ws-q-num">第 ${idx + 1} 題 (${q.level}):</div>
-            <div class="ws-q-zh">${q.zh}</div>
-            <div class="ws-q-en">${q.en}</div>
-            ${mcqHtml}
-            
-            <div class="ws-work-box">
-              <div class="ws-scratchpad">
-                <b>算草欄 / 思考空間 (Working Area):</b>
-                ${isTenFrame ? `
-                  <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
-                    <span>十格陣 (Ten-Frames):</span>
-                    <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
-                    <div class="ws-print-tenframe">${'<div class="ws-print-tf-cell"></div>'.repeat(10)}</div>
-                  </div>
-                ` : ''}
-              </div>
-              <div class="ws-ans-zone">
-                ${answerZone}
-              </div>
-            </div>
-          </div>
-        `;
-      });
+function executePrintJob(){
+  const mode=document.querySelector('input[name="printMode"]:checked').value;
+  let questions;
+  if(mode==="current"){
+    questions=[getCurrentQuestion()];
+  }else if(mode==="10mixed"){
+    questions=mixedPrintQuestions();
+  }else{
+    questions=Array.from({length:10},()=>makeQuestion(currentMod,p2Mode));
+  }
+  $("printWorksheetContainer").innerHTML=worksheetHTML(questions,$("chkIncludeAnswers").checked);
+  closePrintModal();
+  // Allow layout to complete before opening the browser print dialog.
+  setTimeout(()=>window.print(),150);
+}
 
-      if (includeAnswers) {
-        html += `
-          <div class="page-break"></div>
-          <div class="ws-answers-header">
-            📋 教師 / 家長參考答案及解題要點 (Answer Key & Socratic Explanations)
-          </div>
-          <table style="width:100%; border-collapse:collapse; font-size:10pt; line-height:1.5;">
-            <thead>
-              <tr style="background:#eee; text-align:left;">
-                <th style="border:1px solid #999; padding:6px; width:45px;">題號</th>
-                <th style="border:1px solid #999; padding:6px; width:130px;">範疇</th>
-                <th style="border:1px solid #999; padding:6px; width:140px;">參考答案 (Answer)</th>
-                <th style="border:1px solid #999; padding:6px;">解題思維點撥 (Teaching Clue)</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-        questionsToPrint.forEach((q, idx) => {
-          html += `
-            <tr>
-              <td style="border:1px solid #999; padding:6px; font-weight:800; text-align:center;">${idx + 1}</td>
-              <td style="border:1px solid #999; padding:6px;">${q.level}</td>
-              <td style="border:1px solid #999; padding:6px; font-weight:900; color:#1d4ed8;">${q.ans}</td>
-              <td style="border:1px solid #999; padding:6px;">${q.hintZh}</td>
-            </tr>
-          `;
-        });
-        html += `
-            </tbody>
-          </table>
-          <div style="font-size:9pt; color:#666; margin-top:20px; text-align:center;">
-            Furry Red Ball Math Explorer · 建議引導孩子自主發現解難規律，避免直接背誦答案。
-          </div>
-        `;
-      }
+// Browser Ctrl/Cmd+P also has a useful current-question worksheet.
+window.addEventListener("beforeprint",()=>{
+  if(!$("printWorksheetContainer").innerHTML.trim()&&getCurrentQuestion()){
+    $("printWorksheetContainer").innerHTML=worksheetHTML([getCurrentQuestion()],true);
+  }
+});
+window.addEventListener("afterprint",()=>{
+  $("printWorksheetContainer").replaceChildren();
+});
 
-      container.innerHTML = html;
+/* ==========================================================
+   Reports
+   ========================================================== */
+function updateReport(){
+  $("statCorrect").textContent=stats.correct;
+  $("statUnassisted").textContent=stats.unassisted;
+  $("statHints").textContent=stats.hints;
+  $("statLogicRate").textContent=stats.logicTotal
+    ?Math.round(stats.logicCorrect/stats.logicTotal*100)+"%":"--%";
+  $("statShapeRate").textContent=stats.shapeTotal
+    ?Math.round(stats.shapeCorrect/stats.shapeTotal*100)+"%":"--%";
+  $("statShapeCount").textContent=textFor(
+    `答對 ${stats.shapeCorrect} 次 / 選答 ${stats.shapeTotal} 次`,
+    `${stats.shapeCorrect} correct / ${stats.shapeTotal} attempts`
+  );
+  $("storageNotice").hidden=storageAvailable;
+}
 
-      setTimeout(() => {
-        window.print();
-      }, 150);
-    }
+function openReportModal(){
+  updateReport();
+  openModal("reportModal");
+}
 
-    /* Diagnostics */
-    function openReportModal() {
-      document.getElementById('statCorrect').innerText = stats.correct;
-      document.getElementById('statUnassisted').innerText = stats.unassisted;
-      document.getElementById('statHints').innerText = stats.hints;
-      const rate = stats.logicTotal > 0 ? Math.round((stats.logicCorrect / stats.logicTotal) * 100) + '%' : '100%';
-      document.getElementById('statLogicRate').innerText = rate;
-      const shapeRate = stats.shapeTotal > 0 ? Math.round((stats.shapeCorrect / stats.shapeTotal) * 100) + '%' : '--%';
-      document.getElementById('statShapeRate').innerText = shapeRate;
-      document.getElementById('statShapeCount').innerText = stats.shapeTotal > 0
-        ? `（答對 ${stats.shapeCorrect} / 共 ${stats.shapeTotal} 題）`
-        : '（未做過立體圖形題）';
-      document.getElementById('reportModal').classList.add('active');
-    }
+function resetStats(){
+  if(!window.confirm(textFor(
+    "重設星星和統計？已完成的題目仍會保持完成狀態。",
+    "Reset stars and statistics? Already solved questions will remain solved."
+  ))) return;
+  stats={...STATS_DEFAULT};
+  saveStats();
+  updateReport();
+}
 
-    function closeReportModal() {
-      document.getElementById('reportModal').classList.remove('active');
-    }
-
-    function resetStats() {
-      stats = Object.assign({}, STATS_DEFAULT);
-      saveStats();
-      openReportModal();
-    }
-
-    window.onload = () => {
-      saveStats();
-      generateAndPushQuestion();
-    };
-  </script>
+/* Startup */
+saveStats();
+generateAndPushQuestion();
+</script>
 </body>
 </html>
